@@ -1,3 +1,4 @@
+# -*- encoding: utf8 -*-
 from setuptools import setup, find_packages
 
 setup(
@@ -18,7 +19,7 @@ setup(
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: AGPLv3 License',
+        'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules'
