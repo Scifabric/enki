@@ -8,9 +8,11 @@ Makes it easy to statistically analyze [PyBossa](http://dev.pybossa.com>) applic
 ## Install
 
 You can install enki using **pip**, preferably while working in a 
-`virtualenv <http://www.virtualenv.org/en/latest/index.html>`_::
+[virtualenv](http://www.virtualenv.org/en/latest/index.html):
 
+```bash
     $ pip install enki
+```
 
 ## Usage
 
