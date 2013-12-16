@@ -1,10 +1,9 @@
 # Dead simple Python package for analyzing PyBossa application's results
 [![Build Status](https://travis-ci.org/PyBossa/enki.png)](https://travis-ci.org/PyBossa/enki) [![Coverage Status](https://coveralls.io/repos/PyBossa/enki/badge.png)](https://coveralls.io/r/PyBossa/enki)
-[![PyPi version](https://pypip.in/v/enki/badge.png)](https://crate.io/packages/$REPO/)
-[![PyPi downloads](https://pypip.in/d/enki/badge.png)](https://crate.io/packages/$REPO/)
+[![PyPi version](https://pypip.in/v/enki/badge.png)](https://crate.io/packages/enki/)
+[![PyPi downloads](https://pypip.in/d/enki/badge.png)](https://crate.io/packages/enki/)
 
-Makes it easy to statistically analyze `PyBossa <http://dev.pybossa.com>`_
-application results.
+Makes it easy to statistically analyze [PyBossa](http://dev.pybossa.com>) application results.
 
 ## Install
 
@@ -33,7 +32,7 @@ The previous command, loads all **completed** tasks and task runs into four vari
  * **e.task_runs** a dictionary of task runs, where the keys are the
    application task IDs
  * **e.tasks_df** a [Pandas](http://pandas.pydata.org/) list of data frames for the tasks
- * **e.task_runs_df** a  [Pandas](http://pandas.pydata.org/)dictionary of data frame for the task runs,
+ * **e.task_runs_df** a  [Pandas](http://pandas.pydata.org/) dictionary of data frame for the task runs,
    where the keys are the application task IDs
 
 Now that you have downloaded all the tasks and task runs, you can start
@@ -64,10 +63,18 @@ analyzing them using Pandas_:
     dtype: float64
 ```
     
-.. _Pandas: 
-
 Enki explodes the task_run info field if it is a dictionary (a JSON
 object). This will help you to analyze more easily for example, all the
 keys of the object via [Pandas](http://pandas.pydata.org/) statistical solutions. All you have to do is
 to access the key and use [Pandas](http://pandas.pydata.org/) methods.
 
+# Contributing
+
+Please, see [CONTRIBUTING file](CONTRIBUTING.md)
+
+## Copyright
+2013 Copyrigth SF Isle of Man
+
+## License
+
+AGPLv3.0 see [COPYING](COPYING) file.
