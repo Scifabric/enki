@@ -1,0 +1,8 @@
+*.swp
+*.swo
+*.un~
+*.pyc
+*.noseids
+*.coverage
+*.ropeproject
+*docs/_build/
