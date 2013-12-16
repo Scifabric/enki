@@ -1,5 +1,5 @@
 # Dead simple Python package for analyzing PyBossa application's results
-[![Build Status](https://travis-ci.org/PyBossa/enki.png)](https://travis-ci.org/PyBossa/enki)
+[![Build Status](https://travis-ci.org/PyBossa/enki.png)](https://travis-ci.org/PyBossa/enki)[![Coverage Status](https://coveralls.io/repos/PyBossa/enki/badge.png)](https://coveralls.io/r/PyBossa/enki)
 Makes it easy to statistically analyze `PyBossa <http://dev.pybossa.com>`_
 application results.
 
