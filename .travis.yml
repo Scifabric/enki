@@ -4,7 +4,10 @@ python:
 install:
   - pip install -r requirements.txt --use-mirrors
   - pip install -r requirements-testing.txt --use-mirrors
-script: nosetests
+  - pip install -r coveralls --use-mirrors
+script: nosetests --with-coverage --cover-erase --cover-package=enki
 notifications:
   email: false
   irc: "irc.freenode.net#okfn-dev"
+after_success:
+  - coveralls
