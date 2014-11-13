@@ -60,23 +60,35 @@ class Enki(object):
                 tmp[k] = tmp['info'][k]
         return tmp
 
-    def get_tasks(self, state='completed'):
+    def get_tasks(self, task_id=None, state='completed'):
         """Load all app Tasks."""
-        offset = 0
-        limit = 100
+        if task_id:
+            offset = 0
+            limit = 1
+        else:
+            offset = 0
+            limit = 100
         self.tasks = []
-        if self.app:
-            tmp = self.pbclient.find_tasks(app_id=self.app.id,
-                                           state=state,
-                                           limit=limit, offset=offset)
-            while(len(tmp) != 0):
-                self.tasks += tmp
-                offset += limit
-                tmp = self.pbclient.find_tasks(app_id=self.app.id,
-                                               state=state,
-                                               limit=limit, offset=offset)
+        if self.app and task_id:
+            query = dict(app_id=self.app.id,
+                         state=state,
+                         id=task_id,
+                         limit=limit,
+                         offset=offset)
+        elif self.app and task_id is None:
+            query = dict(app_id=self.app.id,
+                         state=state,
+                         limit=limit,
+                         offset=offset)
         else:
             raise AppError()
+
+        tmp = self.pbclient.find_tasks(**query)
+        while(len(tmp) != 0):
+            self.tasks += tmp
+            offset += limit
+            query['offset'] += limit
+            tmp = self.pbclient.find_tasks(**query)
 
         # Create the data frame for tasks
         try:
