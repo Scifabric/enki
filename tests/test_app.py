@@ -92,6 +92,24 @@ class Test(TestEnki):
         e.get_tasks()
 
     @patch('pbclient.requests.get')
+    def test_get_tasks_for_one_id(self, Mock):
+        """Test get_tasks with only one task works."""
+        Mock.return_value = self.create_fake_request([self.app], 200)
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      app_short_name=self.app['short_name'])
+        Mock.side_effect = [self.create_fake_request([self.task], 200),
+                            self.create_fake_request([], 200)]
+        e.get_tasks(task_id=self.task['id'])
+        desc = e.tasks_df['info'].describe()
+        err_msg = "Pandas describe is wrong"
+        assert e.tasks_df['id'].count() == 1, err_msg
+        assert desc['count'] == 1, err_msg
+        assert desc['unique'] == 1, err_msg
+        assert desc['top'] == self.task['info'], err_msg
+        assert desc['freq'] == 1, err_msg
+
+
+    @patch('pbclient.requests.get')
     def test_get_tasks(self, Mock):
         """Test get_tasks with tasks works."""
         Mock.return_value = self.create_fake_request([self.app], 200)
