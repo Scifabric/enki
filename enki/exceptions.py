@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 # This file is part of PyBossa.
 #
-# Copyright (C) 2013 SF Isle of Man Limited
+# Copyright (C) 2015 SF Isle of Man Limited
 #
 # PyBossa is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -20,8 +20,8 @@ This package contains a set of Exceptions for Enki.
 
 The module exports:
     * Error: a generic class for the exceptions
-    * AppNotFound: an exception for not found applications
-    * AppError: an exception for a PyBossa application object not created
+    * ProjectNotFound: an exception for not found projects
+    * ProjectError: an exception for a PyBossa project object not created
 
 """
 
@@ -33,46 +33,54 @@ class Error(Exception):
     pass
 
 
-class AppNotFound(Error):
+class ProjectNotFound(Error):
 
-    """Exception raised for PyBossa application not found."""
+    """Exception raised for PyBossa project not found."""
 
     def __init__(self, value):
+        """Init method."""
         self.value = value
         self.msg = " short_name: %s not found" % self.value
 
     def __str__(self):
+        """String representation."""
         print self.msg  # pragma: no cover
 
 
-class AppError(Error):
+class ProjectError(Error):
 
-    """Exception raised for PyBossa application object not created."""
+    """Exception raised for PyBossa project object not created."""
 
     def __init__(self):
+        """Init method."""
         self.msg = " object not created"
 
     def __str__(self):  # pragma: no cover
+        """String representation."""
         print self.msg
 
 
-class AppWithoutTasks(Error):
+class ProjectWithoutTasks(Error):
 
-    """Exception raised for PyBossa application without tasks."""
+    """Exception raised for PyBossa project without tasks."""
 
     def __init__(self):
-        self.msg = " this app does not have tasks"
+        """Init method."""
+        self.msg = " this project does not have tasks"
 
     def __str__(self):
+        """String representation."""
         print self.msg  # pragma: no cover
 
 
-class AppWithoutTaskRuns(Error):
+class ProjectWithoutTaskRuns(Error):
 
-    """Exception raised for PyBossa application without task runs."""
+    """Exception raised for PyBossa project without task runs."""
 
     def __init__(self):
-        self.msg = " this app does not have task runs"
+        """Init method."""
+        self.msg = " this project does not have task runs"
 
     def __str__(self):
+        """String representation."""
         print self.msg  # pragma: no cover

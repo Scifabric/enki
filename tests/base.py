@@ -23,14 +23,14 @@ FakeRequest = namedtuple('FakeRequest', ['text', 'status_code', 'headers'])
 
 
 class TestEnki(object):
-    app = dict(info='info',
+    project = dict(info='info',
                time_limit=0,
                description="description",
                short_name="slug",
                owner_id=1,
                category_id=1,
                id=1,
-               link="<link rel='self' title='app' href='http://localhost:5000/api/app/1'/>",
+               link="<link rel='self' title='project' href='http://localhost:5000/api/project/1'/>",
                links=["<link rel='category' title='category' href='http://localhost:5000/api/category/1'/>"],
                allow_anonymous_contributors=True,
                hidden=0,
@@ -46,9 +46,9 @@ class TestEnki(object):
     task = dict(info="info",
                 n_answers=30,
                 quorum=0,
-                links=["<link rel='parent' title='app' href='http://localhost:5000/api/app/1'/>"],
+                links=["<link rel='parent' title='project' href='http://localhost:5000/api/project/1'/>"],
                 calibration=0,
-                app_id=1,
+                project_id=1,
                 state="completed",
                 link="<link rel='self' title='task' href='http://localhost:5000/api/task/1'/>",
                 id=1)
@@ -56,9 +56,9 @@ class TestEnki(object):
     task2 = dict(info=dict(key='value'),
                  n_answers=30,
                  quorum=0,
-                 links=["<link rel='parent' title='app' href='http://localhost:5000/api/app/1'/>"],
+                 links=["<link rel='parent' title='project' href='http://localhost:5000/api/project/1'/>"],
                  calibration=0,
-                 app_id=1,
+                 project_id=1,
                  state="completed",
                  link="<link rel='self' title='task' href='http://localhost:5000/api/task/1'/>",
                  id=1)
@@ -67,11 +67,11 @@ class TestEnki(object):
     taskrun = dict(info="info",
                    user_id=None,
                    links=[
-                       "<link rel='parent' title='app' href='http://localhost:5000/api/app/1'/>"
+                       "<link rel='parent' title='project' href='http://localhost:5000/api/project/1'/>"
                        "<link rel='parent' title='task' href='http://localhost:5000/api/taskrun/1'/>"],
                    task_id=1,
                    calibration=None,
-                   app_id=1,
+                   project_id=1,
                    user_ip="127.0.0.1",
                    link="<link rel='self' title='taskrun' href='http://localhost:5000/api/taskrun/1'/>",
                    id=1)

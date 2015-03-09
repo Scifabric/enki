@@ -17,38 +17,38 @@
 # along with PyBossa.  If not, see <http://www.gnu.org/licenses/>.
 """Package to test Enki package."""
 import enki
-from enki.exceptions import AppNotFound, AppError, \
-    AppWithoutTasks, AppWithoutTaskRuns
+from enki.exceptions import ProjectNotFound, ProjectError, \
+    ProjectWithoutTasks, ProjectWithoutTaskRuns
 from mock import patch
 from base import TestEnki
 from nose.tools import raises
 
 
 class Test(TestEnki):
-    @raises(AppNotFound)
+    @raises(ProjectNotFound)
     @patch('pbclient.requests.get')
-    def test_00_get_app_not_found(self, Mock):
-        """Test app not found works."""
+    def test_00_get_project_not_found(self, Mock):
+        """Test project not found works."""
         # App does not exist returns an empty list
         Mock.return_value = self.create_fake_request(data=[], status=200)
         enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                  app_short_name='non-exists')
+                  project_short_name='non-exists')
 
     @patch('pbclient.requests.get')
-    def test_01_get_app_found(self, Mock):
-        """Test app found works."""
-        Mock.return_value = self.create_fake_request([self.app], 200)
+    def test_01_get_project_found(self, Mock):
+        """Test project found works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                      app_short_name=self.app['short_name'])
-        assert e.app.id == self.app['id'], e.app
-        assert e.app.short_name == self.app['short_name'], e.app
+                      project_short_name=self.project['short_name'])
+        assert e.project.id == self.project['id'], e.project
+        assert e.project.short_name == self.project['short_name'], e.project
 
     @patch('pbclient.requests.get')
     def test_explode_info_without_info_dict(self, Mock):
         """Test explode_info method works."""
-        Mock.return_value = self.create_fake_request([self.app], 200)
+        Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                      app_short_name=self.app['short_name'])
+                      project_short_name=self.project['short_name'])
         Mock.side_effect = [self.create_fake_request([self.task], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks()
@@ -59,9 +59,9 @@ class Test(TestEnki):
     @patch('pbclient.requests.get')
     def test_explode_info_with_info_dict(self, Mock):
         """Test explode_info method works."""
-        Mock.return_value = self.create_fake_request([self.app], 200)
+        Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                      app_short_name=self.app['short_name'])
+                      project_short_name=self.project['short_name'])
         Mock.side_effect = [self.create_fake_request([self.task2], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks()
@@ -69,34 +69,34 @@ class Test(TestEnki):
         err_msg = "This item should be exploded"
         assert 'key' in result.keys(), err_msg
 
-    @raises(AppError)
+    @raises(ProjectError)
     @patch('pbclient.requests.get')
-    def test_get_tasks_app_error(self, Mock):
-        """Test get_tasks without app works."""
-        Mock.return_value = self.create_fake_request([self.app], 200)
+    def test_get_tasks_project_error(self, Mock):
+        """Test get_tasks without project works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                      app_short_name=self.app['short_name'])
+                      project_short_name=self.project['short_name'])
         # Make it fail
-        e.app = None
+        e.project = None
         Mock.side_effect = [self.create_fake_request([], 200)]
         e.get_tasks()
 
-    @raises(AppWithoutTasks)
+    @raises(ProjectWithoutTasks)
     @patch('pbclient.requests.get')
     def test_get_tasks_empty(self, Mock):
         """Test get_tasks without tasks works."""
-        Mock.return_value = self.create_fake_request([self.app], 200)
+        Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                      app_short_name=self.app['short_name'])
+                      project_short_name=self.project['short_name'])
         Mock.side_effect = [self.create_fake_request([], 200)]
         e.get_tasks()
 
     @patch('pbclient.requests.get')
     def test_get_tasks_for_one_id(self, Mock):
         """Test get_tasks with only one task works."""
-        Mock.return_value = self.create_fake_request([self.app], 200)
+        Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                      app_short_name=self.app['short_name'])
+                      project_short_name=self.project['short_name'])
         Mock.side_effect = [self.create_fake_request([self.task], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks(task_id=self.task['id'])
@@ -112,9 +112,9 @@ class Test(TestEnki):
     @patch('pbclient.requests.get')
     def test_get_tasks(self, Mock):
         """Test get_tasks with tasks works."""
-        Mock.return_value = self.create_fake_request([self.app], 200)
+        Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                      app_short_name=self.app['short_name'])
+                      project_short_name=self.project['short_name'])
         Mock.side_effect = [self.create_fake_request([self.task], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks()
@@ -126,28 +126,28 @@ class Test(TestEnki):
         assert desc['top'] == self.task['info'], err_msg
         assert desc['freq'] == 1, err_msg
 
-    @raises(AppError)
+    @raises(ProjectError)
     @patch('pbclient.requests.get')
-    def test_get_task_runs_app_error(self, Mock):
+    def test_get_task_runs_project_error(self, Mock):
         """Test get_task_runs without task runs works."""
-        Mock.return_value = self.create_fake_request([self.app], 200)
+        Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                      app_short_name=self.app['short_name'])
+                      project_short_name=self.project['short_name'])
         Mock.side_effect = [self.create_fake_request([self.task], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks()
         # Make it fail
-        e.app = None
+        e.project = None
         Mock.side_effect = [self.create_fake_request([], 200)]
         e.get_task_runs()
 
-    @raises(AppWithoutTaskRuns)
+    @raises(ProjectWithoutTaskRuns)
     @patch('pbclient.requests.get')
     def test_get_task_runs_empty(self, Mock):
         """Test get_task_runs without task runs works."""
-        Mock.return_value = self.create_fake_request([self.app], 200)
+        Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                      app_short_name=self.app['short_name'])
+                      project_short_name=self.project['short_name'])
         Mock.side_effect = [self.create_fake_request([self.task], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks()
@@ -158,9 +158,9 @@ class Test(TestEnki):
     @patch('pbclient.requests.get')
     def test_get_task_runs(self, Mock):
         """Test get_task_runs with task_runs works."""
-        Mock.return_value = self.create_fake_request([self.app], 200)
+        Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
-                      app_short_name=self.app['short_name'])
+                      project_short_name=self.project['short_name'])
         Mock.side_effect = [self.create_fake_request([self.task], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks()
