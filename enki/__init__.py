@@ -24,8 +24,8 @@ This module exports:
 """
 import pandas
 import pbclient
-from exceptions import AppNotFound, AppError, \
-    AppWithoutTasks, AppWithoutTaskRuns
+from exceptions import ProjectNotFound, ProjectError, \
+    ProjectWithoutTasks, ProjectWithoutTaskRuns
 
 
 class Enki(object):
@@ -49,7 +49,7 @@ class Enki(object):
         if (len(project) == 1):
             return project[0]
         else:
-            raise AppNotFound(project_short_name)
+            raise ProjectNotFound(project_short_name)
 
     def explode_info(self, item):
         """Return the a dict of the object but with info field exploded."""
@@ -81,7 +81,7 @@ class Enki(object):
                          limit=limit,
                          offset=offset)
         else:
-            raise AppError()
+            raise ProjectError()
 
         tmp = self.pbclient.find_tasks(**query)
         while(len(tmp) != 0):
@@ -97,7 +97,7 @@ class Enki(object):
             index = [t.__dict__['data']['id'] for t in self.tasks]
             self.tasks_df = pandas.DataFrame(data, index)
         except:
-            raise AppWithoutTasks
+            raise ProjectWithoutTasks
 
     def get_task_runs(self):
         """Load all project Task Runs from Tasks."""
@@ -127,9 +127,9 @@ class Enki(object):
                              self.task_runs[t.id]]
                     self.task_runs_df[t.id] = pandas.DataFrame(data, index)
                 else:
-                    raise AppWithoutTaskRuns
+                    raise ProjectWithoutTaskRuns
         else:
-            raise AppError()
+            raise ProjectError()
 
     def get_all(self):  # pragma: no cover
         """Get task and task_runs from project."""
