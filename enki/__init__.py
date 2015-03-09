@@ -114,13 +114,15 @@ class Enki(object):
                 while(len(tmp) != 0):
                     self.task_runs[t.id] += tmp
                     offset += limit
-                    tmp = self.pbclient.find_taskruns(project_id=self.project.id,
-                                                      task_id=t.id,
-                                                      limit=limit,
-                                                      offset=offset)
+                    tmp = self.pbclient.find_taskruns(
+                        project_id=self.project.id,
+                        task_id=t.id,
+                        limit=limit,
+                        offset=offset)
 
                 if len(self.task_runs[t.id]) > 0:
-                    data = [self.explode_info(tr) for tr in self.task_runs[t.id]]
+                    data = [self.explode_info(tr)
+                            for tr in self.task_runs[t.id]]
                     index = [tr.__dict__['data']['id'] for tr in
                              self.task_runs[t.id]]
                     self.task_runs_df[t.id] = pandas.DataFrame(data, index)
@@ -136,7 +138,6 @@ class Enki(object):
 
     def describe(self, element):  # pragma: no cover
         """Return tasks or task_runs Panda describe."""
-
         if (element == 'tasks'):
             return self.tasks_df.describe()
         elif (element == 'task_runs'):
