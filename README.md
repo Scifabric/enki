@@ -1,9 +1,9 @@
-# Dead simple Python package for analyzing PyBossa application's results
+# Dead simple Python package for analyzing PyBossa project's results
 [![Build Status](https://travis-ci.org/PyBossa/enki.png)](https://travis-ci.org/PyBossa/enki) [![Coverage Status](https://coveralls.io/repos/PyBossa/enki/badge.png)](https://coveralls.io/r/PyBossa/enki)
 [![PyPi version](https://pypip.in/v/enki/badge.png)](https://crate.io/packages/enki/)
 [![PyPi downloads](https://pypip.in/d/enki/badge.png)](https://crate.io/packages/enki/)
 
-Makes it easy to statistically analyze [PyBossa](http://dev.pybossa.com>) application results.
+Makes it easy to statistically analyze [PyBossa](http://dev.pybossa.com>) project results.
 
 ## Install
 
@@ -23,7 +23,7 @@ It is really simple:
 
     # setup the server connection
     >>> e = enki.Enki(api_key='your-key', endpoint='http://server',
-                  app_short_name='your-app-short-name')
+                  project_short_name='your-project-short-name')
     # Get all completed tasks and its associated task runs
     >>> e.get_all()
 ```
@@ -32,16 +32,16 @@ The previous command, loads all **completed** tasks and task runs into four vari
 
  * **e.tasks** a list of tasks
  * **e.task_runs** a dictionary of task runs, where the keys are the
-   application task IDs
+   project task IDs
  * **e.tasks_df** a [Pandas](http://pandas.pydata.org/) list of data frames for the tasks
  * **e.task_runs_df** a  [Pandas](http://pandas.pydata.org/) dictionary of data frame for the task runs,
-   where the keys are the application task IDs
+   where the keys are the project task IDs
 
 Now that you have downloaded all the tasks and task runs, you can start
 analyzing them using Pandas_:
 
 ```python
-    # For example, for a given task of your app:
+    # For example, for a given task of your project:
     >>> task = e.tasks[0]
     # Let's analyze it (note: if the answer is a simple string like 'Yes' or 'No'):
     >>> e.task_runs_df[task.id]['info'].describe()
