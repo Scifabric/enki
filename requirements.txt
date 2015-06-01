@@ -1,3 +1,2 @@
 pandas
 pybossa-client==1.0.1
-pynq

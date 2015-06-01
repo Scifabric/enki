@@ -25,7 +25,6 @@ This module exports:
 import pandas
 import pbclient
 import json
-from pynq import From
 from exceptions import ProjectNotFound, ProjectError, \
     ProjectWithoutTasks, ProjectWithoutTaskRuns
 
@@ -125,10 +124,10 @@ class Enki(object):
                 limit = 100
                 self.task_runs[t.id] = []
                 if json_file:
-                    query = "item.project_id == %s and item.task_id == %s" % \
-                        (self.project.id, t.id)
-                    self.task_runs[t.id] = From(self.task_runs_file)\
-                        .where(query).select_many()
+                    self.task_runs[t.id] = [tr for tr in self.task_runs_file
+                                            if (tr.task_id == t.id
+                                                and
+                                                tr.project_id == self.project.id)]
                 else:
                     tmp = self.pbclient.find_taskruns(project_id=self.project.id,
                                                       task_id=t.id,
