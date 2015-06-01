@@ -62,8 +62,8 @@ class Test(TestEnki):
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
                       project_short_name=self.project['short_name'])
-        e.get_tasks(json_file='test_task.json')
-        result = e.explode_info(e.tasks[1])
+        e.get_tasks(json_file='test_task_no_dict.json')
+        result = e.explode_info(e.tasks[0])
         err_msg = "This item should not be exploded"
         assert 'new_key' not in result.keys(), err_msg
 
@@ -148,6 +148,22 @@ class Test(TestEnki):
         assert desc['unique'] == 1, err_msg
         assert desc['top'] == self.task['info'], err_msg
         assert desc['freq'] == 1, err_msg
+
+    @patch('pbclient.requests.get')
+    def test_get_tasks_with_file(self, Mock):
+        """Test get_tasks with tasks file works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'])
+        e.get_tasks(json_file='test_task_no_dict.json')
+        desc = e.tasks_df['info'].describe()
+        err_msg = "Pandas describe is wrong"
+        assert e.tasks_df['id'].count() == 1, err_msg
+        assert desc['count'] == 1, err_msg
+        assert desc['unique'] == 1, err_msg
+        assert desc['top'] == 'new_key', err_msg
+        assert desc['freq'] == 1, err_msg
+
 
     @raises(ProjectError)
     @patch('pbclient.requests.get')
