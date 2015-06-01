@@ -1,7 +1,7 @@
 # Dead simple Python package for analyzing PyBossa project's results
 [![Build Status](https://travis-ci.org/PyBossa/enki.png)](https://travis-ci.org/PyBossa/enki) [![Coverage Status](https://coveralls.io/repos/PyBossa/enki/badge.png)](https://coveralls.io/r/PyBossa/enki)
-[![PyPi version](https://pypip.in/v/enki/badge.png)](https://crate.io/packages/enki/)
-[![PyPi downloads](https://pypip.in/d/enki/badge.png)](https://crate.io/packages/enki/)
+[![PyPi Downloads Month](https://img.shields.io/pypi/dm/enki.svg)](https://pypi.python.org/pypi/enki/)
+[![PyPi Downloads Week](https://img.shields.io/pypi/dm/enki.svg)]https://pypi.python.org/pypi/enki/)
 
 Makes it easy to statistically analyze [PyBossa](http://dev.pybossa.com>) project results.
 
