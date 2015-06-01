@@ -5,7 +5,7 @@ setup(
     name='enki',
     version='0.0.3',
     packages=find_packages(),
-    install_requires=['pybossa-client>=1.0.0, <1.0.1', 'pandas'],
+    install_requires=['pybossa-client>=1.0.1, <1.0.2', 'pandas'],
     # metadata for upload to PyPI
     author='Daniel Lombraña González',
     author_email='teleyinex@gmail.com',

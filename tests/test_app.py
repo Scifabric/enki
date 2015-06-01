@@ -57,6 +57,18 @@ class Test(TestEnki):
         assert result.keys() == self.task.keys(), err_msg
 
     @patch('pbclient.requests.get')
+    def test_explode_info_without_info_dict_file(self, Mock):
+        """Test explode_info method with file works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'])
+        e.get_tasks(json_file='test_task_no_dict.json')
+        result = e.explode_info(e.tasks[0])
+        err_msg = "This item should not be exploded"
+        assert 'new_key' not in result.keys(), err_msg
+
+
+    @patch('pbclient.requests.get')
     def test_explode_info_with_info_dict(self, Mock):
         """Test explode_info method works."""
         Mock.return_value = self.create_fake_request([self.project], 200)
@@ -65,6 +77,17 @@ class Test(TestEnki):
         Mock.side_effect = [self.create_fake_request([self.task2], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks()
+        result = e.explode_info(e.tasks[0])
+        err_msg = "This item should be exploded"
+        assert 'key' in result.keys(), err_msg
+
+    @patch('pbclient.requests.get')
+    def test_explode_info_with_info_dict_file(self, Mock):
+        """Test explode_info method with a file works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'])
+        e.get_tasks(json_file='test_task.json')
         result = e.explode_info(e.tasks[0])
         err_msg = "This item should be exploded"
         assert 'key' in result.keys(), err_msg
@@ -126,6 +149,38 @@ class Test(TestEnki):
         assert desc['top'] == self.task['info'], err_msg
         assert desc['freq'] == 1, err_msg
 
+    @patch('pbclient.requests.get')
+    def test_get_tasks_with_file(self, Mock):
+        """Test get_tasks with tasks file works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'])
+        e.get_tasks(json_file='test_task_no_dict.json')
+        desc = e.tasks_df['info'].describe()
+        err_msg = "Pandas describe is wrong"
+        assert e.tasks_df['id'].count() == 1, err_msg
+        assert desc['count'] == 1, err_msg
+        assert desc['unique'] == 1, err_msg
+        assert desc['top'] == 'new_key', err_msg
+        assert desc['freq'] == 1, err_msg
+
+    @patch('pbclient.requests.get')
+    def test_get_tasks_with_file_dict(self, Mock):
+        """Test get_tasks with tasks dict file works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'])
+        e.get_tasks(json_file='test_task.json')
+        desc = e.tasks_df['key'].describe()
+        err_msg = "Pandas describe is wrong"
+        assert e.tasks_df['id'].count() == 1, err_msg
+        assert desc['count'] == 1, err_msg
+        assert desc['unique'] == 1, err_msg
+        assert desc['top'] == 'value', err_msg
+        assert desc['freq'] == 1, err_msg
+
+
+
     @raises(ProjectError)
     @patch('pbclient.requests.get')
     def test_get_task_runs_project_error(self, Mock):
@@ -174,3 +229,35 @@ class Test(TestEnki):
         assert desc['unique'] == 1, err_msg
         assert desc['top'] == self.task['info'], err_msg
         assert desc['freq'] == 1, err_msg
+
+    @patch('pbclient.requests.get')
+    def test_get_task_runs_with_file_no_dict(self, Mock):
+        """Test get_task_runs with task_runs with file works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'])
+        e.get_tasks(json_file='test_task_no_dict.json')
+        e.get_task_runs(json_file='test_taskrun_no_dict.json')
+
+        desc = e.task_runs_df[e.tasks[0].id]['info'].describe()
+        err_msg = "Pandas describe is wrong"
+        assert desc['count'] == 1, err_msg
+        assert desc['unique'] == 1, err_msg
+        assert desc['top'] == 'No', err_msg
+        assert desc['freq'] == 1, err_msg
+
+    @patch('pbclient.requests.get')
+    def test_get_task_runs_with_file(self, Mock):
+        """Test get_task_runs with task_runs with file works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'])
+        e.get_tasks(json_file='test_task.json')
+        e.get_task_runs(json_file='test_taskrun.json')
+
+        desc = e.task_runs_df[e.tasks[0].id]['answer'].describe()
+        err_msg = "Pandas describe is wrong"
+        assert desc['count'] == 2, err_msg
+        assert desc['unique'] == 1, err_msg
+        assert desc['top'] == 'Yes', err_msg
+        assert desc['freq'] == 2, err_msg
