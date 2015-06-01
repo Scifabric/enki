@@ -57,6 +57,18 @@ class Test(TestEnki):
         assert result.keys() == self.task.keys(), err_msg
 
     @patch('pbclient.requests.get')
+    def test_explode_info_without_info_dict_file(self, Mock):
+        """Test explode_info method with file works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'])
+        e.get_tasks(json_file='test_task.json')
+        result = e.explode_info(e.tasks[1])
+        err_msg = "This item should not be exploded"
+        assert 'new_key' not in result.keys(), err_msg
+
+
+    @patch('pbclient.requests.get')
     def test_explode_info_with_info_dict(self, Mock):
         """Test explode_info method works."""
         Mock.return_value = self.create_fake_request([self.project], 200)
