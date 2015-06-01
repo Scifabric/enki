@@ -24,6 +24,8 @@ This module exports:
 """
 import pandas
 import pbclient
+import json
+from pynq import From
 from exceptions import ProjectNotFound, ProjectError, \
     ProjectWithoutTasks, ProjectWithoutTaskRuns
 
@@ -60,7 +62,7 @@ class Enki(object):
                 tmp[k] = tmp['info'][k]
         return tmp
 
-    def get_tasks(self, task_id=None, state='completed'):
+    def get_tasks(self, task_id=None, state='completed', json_file=None):
         """Load all project Tasks."""
         if task_id:
             offset = 0
@@ -84,11 +86,17 @@ class Enki(object):
             raise ProjectError()
 
         tmp = self.pbclient.find_tasks(**query)
-        while(len(tmp) != 0):
-            self.tasks += tmp
-            offset += limit
-            query['offset'] += limit
-            tmp = self.pbclient.find_tasks(**query)
+        if json_file:
+            json_file_data = open(json_file).read()
+            tmp_tasks = json.loads(json_file_data)
+            for t in tmp_tasks:
+                self.tasks.append(pbclient.Task(t))
+        else:
+            while(len(tmp) != 0):
+                self.tasks += tmp
+                offset += limit
+                query['offset'] += limit
+                tmp = self.pbclient.find_tasks(**query)
 
         # Create the data frame for tasks
         try:
@@ -99,26 +107,41 @@ class Enki(object):
         except:
             raise ProjectWithoutTasks
 
-    def get_task_runs(self):
+    def get_task_runs(self, json_file=None):
         """Load all project Task Runs from Tasks."""
         self.task_runs = {}
+        self.task_runs_file = []
         self.task_runs_df = {}
+
+        if json_file:
+            json_file_data = open(json_file).read()
+            tmp_task_runs = json.loads(json_file_data)
+            for tr in tmp_task_runs:
+                self.task_runs_file.append(pbclient.TaskRun(tr))
+
         if self.project:
             for t in self.tasks:
                 offset = 0
                 limit = 100
                 self.task_runs[t.id] = []
-                tmp = self.pbclient.find_taskruns(project_id=self.project.id,
-                                                  task_id=t.id,
-                                                  limit=limit, offset=offset)
-                while(len(tmp) != 0):
-                    self.task_runs[t.id] += tmp
-                    offset += limit
-                    tmp = self.pbclient.find_taskruns(
-                        project_id=self.project.id,
-                        task_id=t.id,
-                        limit=limit,
-                        offset=offset)
+                if json_file:
+                    query = "item.project_id == %s and item.task_id == %s" % \
+                        (self.project.id, t.id)
+                    self.task_runs[t.id] = From(self.task_runs_file)\
+                        .where(query).select_many()
+                else:
+                    tmp = self.pbclient.find_taskruns(project_id=self.project.id,
+                                                      task_id=t.id,
+                                                      limit=limit,
+                                                      offset=offset)
+                    while(len(tmp) != 0):
+                        self.task_runs[t.id] += tmp
+                        offset += limit
+                        tmp = self.pbclient.find_taskruns(
+                            project_id=self.project.id,
+                            task_id=t.id,
+                            limit=limit,
+                            offset=offset)
 
                 if len(self.task_runs[t.id]) > 0:
                     data = [self.explode_info(tr)

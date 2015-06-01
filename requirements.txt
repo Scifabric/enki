@@ -1,2 +1,3 @@
 pandas
-pybossa-client==1.0.0
+pybossa-client==1.0.1
+pynq
