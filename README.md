@@ -70,6 +70,24 @@ object). This will help you to analyze more easily for example, all the
 keys of the object via [Pandas](http://pandas.pydata.org/) statistical solutions. All you have to do is
 to access the key and use [Pandas](http://pandas.pydata.org/) methods.
 
+# Using PyBossa JSON files
+
+PyBossa exports the tasks and task runs as ZIP files in JSON format. You can pass those files to Enki, and
+avoid using the API for a faster analysis. If that's the case, download both files (task and task runs) and import them:
+
+```python
+    >>> import enki
+
+    # setup the server connection
+    >>> e = enki.Enki(api_key='your-key', endpoint='http://server',
+                  project_short_name='your-project-short-name')
+    # Get all completed tasks and its associated task runs
+    e.get_tasks(json_file='path/to/your/tasks.json')
+    e.get_task_runs(json_file='path/to/your/task_runs.json')
+```
+
+Then you can do the analysis as before. 
+
 # Contributing
 
 Please, see [CONTRIBUTING file](CONTRIBUTING.md)
