@@ -70,6 +70,14 @@ object). This will help you to analyze more easily for example, all the
 keys of the object via [Pandas](http://pandas.pydata.org/) statistical solutions. All you have to do is
 to access the key and use [Pandas](http://pandas.pydata.org/) methods.
 
+**NOTE**: if you want to load partial results, you can do it. Instead of using e.get_all() method, use the following code:
+
+```python
+e.get_tasks(state='ongoing')
+e.get_task_runs()
+```
+That will get the partial results. Then you can proceed with the analysis as before.
+
 # Using PyBossa JSON files
 
 PyBossa exports the tasks and task runs as ZIP files in JSON format. You can pass those files to Enki, and
