@@ -79,18 +79,18 @@ class Enki(object):
                          offset=offset)
         self.tasks = []
 
-        tmp = pbclient.find_tasks(**query)
         if json_file:
             json_file_data = open(json_file).read()
-            tmp_tasks = json.loads(json_file_data)
-            for t in tmp_tasks:
+            file_tasks = json.loads(json_file_data)
+            for t in file_tasks:
                 self.tasks.append(pbclient.Task(t))
         else:
-            while(len(tmp) != 0):
-                self.tasks += tmp
+            tasks = pbclient.find_tasks(**query)
+            while(len(tasks) != 0):
+                self.tasks += tasks
                 offset += limit
                 query['offset'] += limit
-                tmp = pbclient.find_tasks(**query)
+                tasks = pbclient.find_tasks(**query)
 
         # Create the data frame for tasks
         try:
@@ -109,8 +109,8 @@ class Enki(object):
 
         if json_file:
             json_file_data = open(json_file).read()
-            tmp_task_runs = json.loads(json_file_data)
-            for tr in tmp_task_runs:
+            file_task_runs = json.loads(json_file_data)
+            for tr in file_task_runs:
                 self.task_runs_file.append(pbclient.TaskRun(tr))
 
         if self.project:
