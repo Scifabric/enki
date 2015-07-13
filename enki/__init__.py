@@ -119,6 +119,7 @@ class Enki(object):
                 self.task_runs_file.append(pbclient.TaskRun(tr))
 
         if self.project:
+            task_without_taskruns_count = 0
             for t in self.tasks:
                 offset = 0
                 limit = 100
@@ -149,7 +150,9 @@ class Enki(object):
                              self.task_runs[t.id]]
                     self.task_runs_df[t.id] = pandas.DataFrame(data, index)
                 else:
-                    raise ProjectWithoutTaskRuns
+                    task_without_taskruns_count += 1
+            if task_without_taskruns_count == len(self.tasks):
+                raise ProjectWithoutTaskRuns
         else:
             raise ProjectError()
 
