@@ -6,3 +6,4 @@
 *.coverage
 *.ropeproject
 *docs/_build/
+/env
