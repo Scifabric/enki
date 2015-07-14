@@ -6,7 +6,7 @@
 Welcome to enki's documentation!
 ==========================================
 
-This small library will help you to analyze your PyBossa_ applications' results. 
+This small library will help you to analyze your PyBossa_ projects results.
 
 .. _PyBossa: http://dev.pybossa.com
 
@@ -27,7 +27,7 @@ Setup::
 
     # setup the server connection
     >>> e = enki.Enki(api_key='your-key', endpoint='http://server',
-                  app_short_name='your-app-short-name')
+                      project_short_name='your-project-short-name')
     # Get all completed tasks and its associated task runs
     >>> e.get_all()
 
@@ -35,15 +35,15 @@ The previous command, loads all **completed** tasks and task runs into four vari
 
  * **e.tasks** a list of tasks
  * **e.task_runs** a dictionary of task runs, where the keys are the
-   application task IDs
+   project task IDs
  * **e.tasks_df** a Pandas_ list of data frames for the tasks
  * **e.task_runs_df** a Pandas_ dictionary of data frame for the task runs,
-   where the keys are the application task IDs
+   where the keys are the project task IDs
 
 Now that you have downloaded all the tasks and task runs, you can start
 analyzing them using Pandas_::
 
-    # For example, for a given task of your app:
+    # For example, for a given task of your project:
     >>> task = e.tasks[0]
     # Let's analyze it (note: if the answer is a simple string like 'Yes' or 'No'):
     >>> e.task_runs_df[task.id]['info'].describe()

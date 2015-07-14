@@ -23,7 +23,7 @@ It is really simple:
 
     # setup the server connection
     >>> e = enki.Enki(api_key='your-key', endpoint='http://server',
-                  project_short_name='your-project-short-name')
+                      project_short_name='your-project-short-name')
     # Get all completed tasks and its associated task runs
     >>> e.get_all()
 ```
