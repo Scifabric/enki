@@ -35,18 +35,15 @@ class Enki(object):
 
     def __init__(self, api_key, endpoint, project_short_name):
         """Initiate."""
-        self.api_key = api_key
-        self.endpoint = endpoint
         self.project = None
-        self.pbclient = pbclient
-        self.pbclient.set('api_key', self.api_key)
-        self.pbclient.set('endpoint', self.endpoint)
+        pbclient.set('api_key', api_key)
+        pbclient.set('endpoint', endpoint)
         if self.project is None:
             self.project = self.get_project(project_short_name)
 
     def get_project(self, project_short_name):
         """Return project object."""
-        project = self.pbclient.find_project(short_name=project_short_name)
+        project = pbclient.find_project(short_name=project_short_name)
         if (len(project) == 1):
             return project[0]
         else:
@@ -54,48 +51,46 @@ class Enki(object):
 
     def explode_info(self, item):
         """Return the a dict of the object but with info field exploded."""
-        tmp = item.__dict__['data']
+        item_data = item.__dict__['data']
         if type(item.info) == dict:
-            keys = tmp['info'].keys()
+            keys = item_data['info'].keys()
             for k in keys:
-                tmp[k] = tmp['info'][k]
-        return tmp
+                item_data[k] = item_data['info'][k]
+        return item_data
 
     def get_tasks(self, task_id=None, state='completed', json_file=None):
         """Load all project Tasks."""
+        if self.project is None:
+            raise ProjectError
         if task_id:
             offset = 0
             limit = 1
-        else:
-            offset = 0
-            limit = 100
-        self.tasks = []
-        if self.project and task_id:
             query = dict(project_id=self.project.id,
                          state=state,
                          id=task_id,
                          limit=limit,
                          offset=offset)
-        elif self.project and task_id is None:
+        else:
+            offset = 0
+            limit = 100
             query = dict(project_id=self.project.id,
                          state=state,
                          limit=limit,
                          offset=offset)
-        else:
-            raise ProjectError()
+        self.tasks = []
 
-        tmp = self.pbclient.find_tasks(**query)
         if json_file:
             json_file_data = open(json_file).read()
-            tmp_tasks = json.loads(json_file_data)
-            for t in tmp_tasks:
+            file_tasks = json.loads(json_file_data)
+            for t in file_tasks:
                 self.tasks.append(pbclient.Task(t))
         else:
-            while(len(tmp) != 0):
-                self.tasks += tmp
+            tasks = pbclient.find_tasks(**query)
+            while(len(tasks) != 0):
+                self.tasks += tasks
                 offset += limit
                 query['offset'] += limit
-                tmp = self.pbclient.find_tasks(**query)
+                tasks = pbclient.find_tasks(**query)
 
         # Create the data frame for tasks
         try:
@@ -114,11 +109,12 @@ class Enki(object):
 
         if json_file:
             json_file_data = open(json_file).read()
-            tmp_task_runs = json.loads(json_file_data)
-            for tr in tmp_task_runs:
+            file_task_runs = json.loads(json_file_data)
+            for tr in file_task_runs:
                 self.task_runs_file.append(pbclient.TaskRun(tr))
 
         if self.project:
+            task_without_taskruns_count = 0
             for t in self.tasks:
                 offset = 0
                 limit = 100
@@ -129,14 +125,14 @@ class Enki(object):
                                                 and
                                                 tr.project_id == self.project.id)]
                 else:
-                    tmp = self.pbclient.find_taskruns(project_id=self.project.id,
+                    tmp = pbclient.find_taskruns(project_id=self.project.id,
                                                       task_id=t.id,
                                                       limit=limit,
                                                       offset=offset)
                     while(len(tmp) != 0):
                         self.task_runs[t.id] += tmp
                         offset += limit
-                        tmp = self.pbclient.find_taskruns(
+                        tmp = pbclient.find_taskruns(
                             project_id=self.project.id,
                             task_id=t.id,
                             limit=limit,
@@ -149,7 +145,9 @@ class Enki(object):
                              self.task_runs[t.id]]
                     self.task_runs_df[t.id] = pandas.DataFrame(data, index)
                 else:
-                    raise ProjectWithoutTaskRuns
+                    task_without_taskruns_count += 1
+            if task_without_taskruns_count == len(self.tasks):
+                raise ProjectWithoutTaskRuns
         else:
             raise ProjectError()
 

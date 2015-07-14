@@ -63,6 +63,15 @@ class TestEnki(object):
                  link="<link rel='self' title='task' href='http://localhost:5000/api/task/1'/>",
                  id=1)
 
+    ongoing_task = dict(info=dict(key='value'),
+                 n_answers=30,
+                 quorum=0,
+                 links=["<link rel='parent' title='project' href='http://localhost:5000/api/project/1'/>"],
+                 calibration=0,
+                 project_id=1,
+                 state="ongoing",
+                 link="<link rel='self' title='task' href='http://localhost:5000/api/task/2'/>",
+                 id=2)
 
     taskrun = dict(info="info",
                    user_id=None,
