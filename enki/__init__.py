@@ -166,8 +166,7 @@ class ServerTaskLoader(object):
 class JsonTaskLoader(object):
 
     def __init__(self, project, json_file):
-        super(JsonTaskLoader, self).__init__()
-        self.arg = project = project
+        self.project = project
         self.json_file = json_file
 
     def load(self):
