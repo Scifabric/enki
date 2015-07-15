@@ -108,12 +108,8 @@ class Enki(object):
         self.task_runs = {}
         self.task_runs_file = []
         self.task_runs_df = {}
+        (self.task_runs, self.task_runs_file, self.task_runs_df) = TaskRunLoader(self.project, self.tasks, json_file).load()
 
-        if json_file:
-            self._load_task_runs_from_file(json_file)
-        else:
-            self._load_task_runs_from_server()
-        self._check_project_has_taskruns()
 
     def get_all(self):  # pragma: no cover
         """Get task and task_runs from project."""
@@ -129,12 +125,33 @@ class Enki(object):
         else:
             return "ERROR: %s not found" % element
 
-    def _load_task_runs_from_file(self, json_file):
-        self._load_from_json(json_file)
+
+class TaskRunLoader(object):
+    def __init__(self, project, tasks, json_file=None):
+        self.project = project
+        self.tasks = tasks
+        self.json_file = json_file
+
+    def load(self):
+        if self.project is None:
+            raise ProjectError
+        self.task_runs = {}
+        self.task_runs_file = []
+        self.task_runs_df = {}
+
+        if self.json_file:
+            self._load_from_file()
+        else:
+            self._load_from_server()
+        self._check_project_has_taskruns()
+        return (self.task_runs, self.task_runs_file, self.task_runs_df)
+
+    def _load_from_file(self):
+        self._load_from_json()
         self._group_json_task_runs_by_task_id()
 
-    def _load_from_json(self, json_file):
-        json_file_data = open(json_file).read()
+    def _load_from_json(self):
+        json_file_data = open(self.json_file).read()
         file_task_runs = json.loads(json_file_data)
         for tr in file_task_runs:
             self.task_runs_file.append(pbclient.TaskRun(tr))
@@ -147,7 +164,7 @@ class Enki(object):
                                         tr.project_id == self.project.id)]
             self._create_task_run_dfs(t.id)
 
-    def _load_task_runs_from_server(self):
+    def _load_from_server(self):
         for t in self.tasks:
             limit = 100
             self.task_runs[t.id] = []
@@ -177,3 +194,12 @@ class Enki(object):
         total_task_runs = reduce(add_number_task_runs, self.task_runs.values(), 0)
         if total_task_runs == 0:
             raise ProjectWithoutTaskRuns
+
+    def explode_info(self, item):
+        """Return the a dict of the object but with info field exploded."""
+        item_data = item.__dict__['data']
+        if type(item.info) == dict:
+            keys = item_data['info'].keys()
+            for k in keys:
+                item_data[k] = item_data['info'][k]
+        return item_data
