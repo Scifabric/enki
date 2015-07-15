@@ -92,14 +92,8 @@ class Enki(object):
                 query['offset'] += limit
                 tasks = pbclient.find_tasks(**query)
 
-        # Create the data frame for tasks
-        try:
-            self.tasks[0]
-            data = [self.explode_info(t) for t in self.tasks]
-            index = [t.__dict__['data']['id'] for t in self.tasks]
-            self.tasks_df = pandas.DataFrame(data, index)
-        except IndexError:
-            raise ProjectWithoutTasks
+        self._check_project_has_tasks()
+        self.tasks_df = DataFrameFactory().create_data_frame(self.tasks)
 
     def get_task_runs(self, json_file=None):
         """Load all project Task Runs from Tasks."""
@@ -110,7 +104,11 @@ class Enki(object):
 
         self._check_project_has_taskruns()
 
-        self.task_runs_df = DataFrameFactory().create_data_frames(self.tasks, self.task_runs)
+        self.task_runs_df = DataFrameFactory().create_task_run_data_frames(self.tasks, self.task_runs)
+
+    def _check_project_has_tasks(self):
+        if len(self.tasks) == 0:
+            raise ProjectWithoutTasks
 
     def _check_project_has_taskruns(self):
         add_number_task_runs = lambda total, task_runs: total + len(task_runs)
@@ -139,15 +137,15 @@ class Enki(object):
 
 
 class DataFrameFactory(object):
-    def create_data_frames(self, tasks, task_runs):
+    def create_task_run_data_frames(self, tasks, task_runs):
         task_runs_df = {}
         for task in tasks:
             task_runs_df[task.id] = self.create_data_frame(task_runs[task.id])
         return task_runs_df
 
-    def create_data_frame(self, task_runs):
-        data = [self.explode_info(tr) for tr in task_runs]
-        index = [tr.__dict__['data']['id'] for tr in task_runs]
+    def create_data_frame(self, item):
+        data = [self.explode_info(tr) for tr in item]
+        index = [tr.__dict__['data']['id'] for tr in item]
         return pandas.DataFrame(data, index)
 
     def explode_info(self, item):
