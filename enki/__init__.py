@@ -155,9 +155,10 @@ class ServerTaskLoader(object):
     def load(self):
         self.tasks = []
         tasks = pbclient.find_tasks(**self.query)
+        del self.query['offset']
         while(len(tasks) != 0):
             self.tasks += tasks
-            self.query['offset'] += self.query['limit']
+            self.query['last_id'] = tasks[-1].id
             tasks = pbclient.find_tasks(**self.query)
         return self.tasks
 
