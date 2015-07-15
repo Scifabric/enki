@@ -149,21 +149,20 @@ class Enki(object):
 
     def _load_task_runs_from_server(self):
         for t in self.tasks:
-            offset = 0
             limit = 100
             self.task_runs[t.id] = []
             taskruns = pbclient.find_taskruns(project_id=self.project.id,
                                               task_id=t.id,
                                               limit=limit,
-                                              offset=offset)
+                                              offset=0)
             while(len(taskruns) != 0):
                 self.task_runs[t.id] += taskruns
-                offset += limit
+                last_id = taskruns[-1].id
                 taskruns = pbclient.find_taskruns(
                     project_id=self.project.id,
                     task_id=t.id,
                     limit=limit,
-                    offset=offset)
+                    last_id=last_id)
             self._create_task_run_dfs(t.id)
 
     def _create_task_run_dfs(self, task_id):
