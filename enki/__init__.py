@@ -105,11 +105,23 @@ class Enki(object):
         """Load all project Task Runs from Tasks."""
         if self.project is None:
             raise ProjectError
-        self.task_runs = {}
-        self.task_runs_file = []
-        self.task_runs_df = {}
-        (self.task_runs, self.task_runs_file, self.task_runs_df) = TaskRunLoader(self.project, self.tasks, json_file).load()
+        loader = self._create_task_runs_loader(self.project, self.tasks, json_file)
+        self.task_runs, self.task_runs_file = loader.load()
 
+        self._check_project_has_taskruns()
+
+        self.task_runs_df = DataFrameFactory().create_data_frames(self.tasks, self.task_runs)
+
+    def _check_project_has_taskruns(self):
+        add_number_task_runs = lambda total, task_runs: total + len(task_runs)
+        total_task_runs = reduce(add_number_task_runs, self.task_runs.values(), 0)
+        if total_task_runs == 0:
+            raise ProjectWithoutTaskRuns
+
+    def _create_task_runs_loader(self, project, tasks, json_file):
+        if json_file is not None:
+            return JsonTaskRunsLoader(project, tasks, json_file)
+        return ServerTaskRunsLoader(project, tasks)
 
     def get_all(self):  # pragma: no cover
         """Get task and task_runs from project."""
@@ -126,43 +138,40 @@ class Enki(object):
             return "ERROR: %s not found" % element
 
 
-class TaskRunLoader(object):
-    def __init__(self, project, tasks, json_file=None):
+class DataFrameFactory(object):
+    def create_data_frames(self, tasks, task_runs):
+        task_runs_df = {}
+        for task in tasks:
+            task_runs_df[task.id] = self.create_data_frame(task_runs[task.id])
+        return task_runs_df
+
+    def create_data_frame(self, task_runs):
+        data = [self.explode_info(tr) for tr in task_runs]
+        index = [tr.__dict__['data']['id'] for tr in task_runs]
+        return pandas.DataFrame(data, index)
+
+    def explode_info(self, item):
+        """Return the a dict of the object but with info field exploded."""
+        item_data = item.__dict__['data']
+        if type(item.info) == dict:
+            keys = item_data['info'].keys()
+            for k in keys:
+                item_data[k] = item_data['info'][k]
+        return item_data
+
+
+class ServerTaskRunsLoader(object):
+    def __init__(self, project, tasks):
         self.project = project
         self.tasks = tasks
-        self.json_file = json_file
 
     def load(self):
-        if self.project is None:
-            raise ProjectError
         self.task_runs = {}
         self.task_runs_file = []
         self.task_runs_df = {}
 
-        if self.json_file:
-            self._load_from_file()
-        else:
-            self._load_from_server()
-        self._check_project_has_taskruns()
-        return (self.task_runs, self.task_runs_file, self.task_runs_df)
-
-    def _load_from_file(self):
-        self._load_from_json()
-        self._group_json_task_runs_by_task_id()
-
-    def _load_from_json(self):
-        json_file_data = open(self.json_file).read()
-        file_task_runs = json.loads(json_file_data)
-        for tr in file_task_runs:
-            self.task_runs_file.append(pbclient.TaskRun(tr))
-
-    def _group_json_task_runs_by_task_id(self):
-        for t in self.tasks:
-            self.task_runs[t.id] = [tr for tr in self.task_runs_file
-                                    if (tr.task_id == t.id
-                                        and
-                                        tr.project_id == self.project.id)]
-            self._create_task_run_dfs(t.id)
+        self._load_from_server()
+        return (self.task_runs, self.task_runs_file)
 
     def _load_from_server(self):
         for t in self.tasks:
@@ -180,26 +189,35 @@ class TaskRunLoader(object):
                     task_id=t.id,
                     limit=limit,
                     last_id=last_id)
-            self._create_task_run_dfs(t.id)
 
-    def _create_task_run_dfs(self, task_id):
-        data = [self.explode_info(tr)
-                for tr in self.task_runs[task_id]]
-        index = [tr.__dict__['data']['id'] for tr in
-                 self.task_runs[task_id]]
-        self.task_runs_df[task_id] = pandas.DataFrame(data, index)
 
-    def _check_project_has_taskruns(self):
-        add_number_task_runs = lambda total, task_runs: total + len(task_runs)
-        total_task_runs = reduce(add_number_task_runs, self.task_runs.values(), 0)
-        if total_task_runs == 0:
-            raise ProjectWithoutTaskRuns
+class JsonTaskRunsLoader(object):
+    def __init__(self, project, tasks, json_file):
+        self.project = project
+        self.tasks = tasks
+        self.json_file = json_file
 
-    def explode_info(self, item):
-        """Return the a dict of the object but with info field exploded."""
-        item_data = item.__dict__['data']
-        if type(item.info) == dict:
-            keys = item_data['info'].keys()
-            for k in keys:
-                item_data[k] = item_data['info'][k]
-        return item_data
+    def load(self):
+        self.task_runs = {}
+        self.task_runs_file = []
+        self.task_runs_df = {}
+
+        self._load_from_file()
+        return (self.task_runs, self.task_runs_file)
+
+    def _load_from_file(self):
+        self._load_from_json()
+        self._group_json_task_runs_by_task_id()
+
+    def _load_from_json(self):
+        json_file_data = open(self.json_file).read()
+        file_task_runs = json.loads(json_file_data)
+        for tr in file_task_runs:
+            self.task_runs_file.append(pbclient.TaskRun(tr))
+
+    def _group_json_task_runs_by_task_id(self):
+        for t in self.tasks:
+            self.task_runs[t.id] = [tr for tr in self.task_runs_file
+                                    if (tr.task_id == t.id
+                                        and
+                                        tr.project_id == self.project.id)]
