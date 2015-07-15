@@ -179,8 +179,6 @@ class Test(TestEnki):
         assert desc['top'] == 'value', err_msg
         assert desc['freq'] == 1, err_msg
 
-
-
     @raises(ProjectError)
     @patch('pbclient.requests.get')
     def test_get_task_runs_project_error(self, Mock):

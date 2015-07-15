@@ -57,35 +57,10 @@ class Enki(object):
         """Load all project Tasks."""
         if self.project is None:
             raise ProjectError
-        if task_id:
-            offset = 0
-            limit = 1
-            query = dict(project_id=self.project.id,
-                         state=state,
-                         id=task_id,
-                         limit=limit,
-                         offset=offset)
-        else:
-            offset = 0
-            limit = 100
-            query = dict(project_id=self.project.id,
-                         state=state,
-                         limit=limit,
-                         offset=offset)
-        self.tasks = []
 
-        if json_file:
-            json_file_data = open(json_file).read()
-            file_tasks = json.loads(json_file_data)
-            for t in file_tasks:
-                self.tasks.append(pbclient.Task(t))
-        else:
-            tasks = pbclient.find_tasks(**query)
-            while(len(tasks) != 0):
-                self.tasks += tasks
-                offset += limit
-                query['offset'] += limit
-                tasks = pbclient.find_tasks(**query)
+        query = self._build_query(task_id, state)
+        loader = self._create_task_loader(query, json_file)
+        self.tasks = loader.load()
 
         self._check_project_has_tasks()
         self.tasks_df = DataFrameFactory().create_data_frame(self.tasks)
@@ -94,26 +69,11 @@ class Enki(object):
         """Load all project Task Runs from Tasks."""
         if self.project is None:
             raise ProjectError
-        loader = self._create_task_runs_loader(self.project, self.tasks, json_file)
+        loader = self._create_task_runs_loader(json_file)
         self.task_runs, self.task_runs_file = loader.load()
 
         self._check_project_has_taskruns()
         self.task_runs_df = DataFrameFactory().create_task_run_data_frames(self.tasks, self.task_runs)
-
-    def _check_project_has_tasks(self):
-        if len(self.tasks) == 0:
-            raise ProjectWithoutTasks
-
-    def _check_project_has_taskruns(self):
-        add_number_task_runs = lambda total, task_runs: total + len(task_runs)
-        total_task_runs = reduce(add_number_task_runs, self.task_runs.values(), 0)
-        if total_task_runs == 0:
-            raise ProjectWithoutTaskRuns
-
-    def _create_task_runs_loader(self, project, tasks, json_file):
-        if json_file is not None:
-            return JsonTaskRunsLoader(project, tasks, json_file)
-        return ServerTaskRunsLoader(project, tasks)
 
     def get_all(self):  # pragma: no cover
         """Get task and task_runs from project."""
@@ -128,6 +88,40 @@ class Enki(object):
             return self.task_runs_df.describe()
         else:
             return "ERROR: %s not found" % element
+
+    def _build_query(self, task_id, state):
+        if task_id is not None:
+            query = dict(project_id=self.project.id,
+                         state=state,
+                         id=task_id,
+                         limit=1,
+                         offset=0)
+        else:
+            query = dict(project_id=self.project.id,
+                         state=state,
+                         limit=100,
+                         offset=0)
+        return query
+
+    def _check_project_has_tasks(self):
+        if len(self.tasks) == 0:
+            raise ProjectWithoutTasks
+
+    def _check_project_has_taskruns(self):
+        add_number_task_runs = lambda total, task_runs: total + len(task_runs)
+        total_task_runs = reduce(add_number_task_runs, self.task_runs.values(), 0)
+        if total_task_runs == 0:
+            raise ProjectWithoutTaskRuns
+
+    def _create_task_loader(self, query, json_file):
+        if json_file is not None:
+            return JsonTaskLoader(self.project, json_file)
+        return ServerTaskLoader(self.project, query)
+
+    def _create_task_runs_loader(self, json_file):
+        if json_file is not None:
+            return JsonTaskRunsLoader(self.project, self.tasks, json_file)
+        return ServerTaskRunsLoader(self.project, self.tasks)
 
 
 class DataFrameFactory(object):
@@ -150,6 +144,35 @@ class DataFrameFactory(object):
             for k in keys:
                 item_data[k] = item_data['info'][k]
         return item_data
+
+
+class ServerTaskLoader(object):
+
+    def __init__(self, project, query):
+        self.project = project
+        self.query = query
+
+    def load(self):
+        self.tasks = []
+        tasks = pbclient.find_tasks(**self.query)
+        while(len(tasks) != 0):
+            self.tasks += tasks
+            self.query['offset'] += self.query['limit']
+            tasks = pbclient.find_tasks(**self.query)
+        return self.tasks
+
+
+class JsonTaskLoader(object):
+
+    def __init__(self, project, json_file):
+        super(JsonTaskLoader, self).__init__()
+        self.arg = project = project
+        self.json_file = json_file
+
+    def load(self):
+        json_file_data = open(self.json_file).read()
+        file_tasks = json.loads(json_file_data)
+        return [pbclient.Task(t) for t in file_tasks]
 
 
 class ServerTaskRunsLoader(object):
