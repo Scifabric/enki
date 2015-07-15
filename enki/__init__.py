@@ -51,12 +51,7 @@ class Enki(object):
 
     def explode_info(self, item):
         """Return the a dict of the object but with info field exploded."""
-        item_data = item.__dict__['data']
-        if type(item.info) == dict:
-            keys = item_data['info'].keys()
-            for k in keys:
-                item_data[k] = item_data['info'][k]
-        return item_data
+        return DataFrameFactory().explode_info(item)
 
     def get_tasks(self, task_id=None, state='completed', json_file=None):
         """Load all project Tasks."""
@@ -103,7 +98,6 @@ class Enki(object):
         self.task_runs, self.task_runs_file = loader.load()
 
         self._check_project_has_taskruns()
-
         self.task_runs_df = DataFrameFactory().create_task_run_data_frames(self.tasks, self.task_runs)
 
     def _check_project_has_tasks(self):
@@ -137,6 +131,7 @@ class Enki(object):
 
 
 class DataFrameFactory(object):
+
     def create_task_run_data_frames(self, tasks, task_runs):
         task_runs_df = {}
         for task in tasks:
@@ -149,7 +144,6 @@ class DataFrameFactory(object):
         return pandas.DataFrame(data, index)
 
     def explode_info(self, item):
-        """Return the a dict of the object but with info field exploded."""
         item_data = item.__dict__['data']
         if type(item.info) == dict:
             keys = item_data['info'].keys()
@@ -159,6 +153,7 @@ class DataFrameFactory(object):
 
 
 class ServerTaskRunsLoader(object):
+
     def __init__(self, project, tasks):
         self.project = project
         self.tasks = tasks
@@ -190,6 +185,7 @@ class ServerTaskRunsLoader(object):
 
 
 class JsonTaskRunsLoader(object):
+
     def __init__(self, project, tasks, json_file):
         self.project = project
         self.tasks = tasks
