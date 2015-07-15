@@ -98,7 +98,7 @@ class Enki(object):
             data = [self.explode_info(t) for t in self.tasks]
             index = [t.__dict__['data']['id'] for t in self.tasks]
             self.tasks_df = pandas.DataFrame(data, index)
-        except:
+        except IndexError:
             raise ProjectWithoutTasks
 
     def get_task_runs(self, json_file=None):
