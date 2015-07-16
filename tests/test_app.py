@@ -265,14 +265,15 @@ class Test(TestEnki):
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
                       project_short_name=self.project['short_name'])
-        Mock.side_effect = [self.create_fake_request([self.task], 200),
-                            self.create_fake_request([self.ongoing_task], 200),
+        Mock.side_effect = [self.create_fake_request([self.task, self.ongoing_task], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks()
+        print e.tasks
         Mock.side_effect = [self.create_fake_request([self.taskrun], 200),
                             self.create_fake_request([], 200),
                             self.create_fake_request([], 200)]
         e.get_task_runs()
 
         assert len(e.task_runs[self.task['id']]) is 1
+        print self.ongoing_task
         assert e.task_runs[self.ongoing_task['id']] == []
