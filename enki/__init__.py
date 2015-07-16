@@ -58,8 +58,7 @@ class Enki(object):
         if self.project is None:
             raise ProjectError
 
-        query = self._build_query(task_id, state)
-        loader = self._create_task_loader(query, json_file)
+        loader = self._create_task_loader(task_id, state, json_file)
         self.tasks = loader.load()
 
         self._check_project_has_tasks()
@@ -89,20 +88,6 @@ class Enki(object):
         else:
             return "ERROR: %s not found" % element
 
-    def _build_query(self, task_id, state):
-        if task_id is not None:
-            query = dict(project_id=self.project.id,
-                         state=state,
-                         id=task_id,
-                         limit=1,
-                         offset=0)
-        else:
-            query = dict(project_id=self.project.id,
-                         state=state,
-                         limit=100,
-                         offset=0)
-        return query
-
     def _check_project_has_tasks(self):
         if len(self.tasks) == 0:
             raise ProjectWithoutTasks
@@ -113,10 +98,10 @@ class Enki(object):
         if total_task_runs == 0:
             raise ProjectWithoutTaskRuns
 
-    def _create_task_loader(self, query, json_file):
+    def _create_task_loader(self, task_id, state, json_file):
         if json_file is not None:
             return JsonTaskLoader(json_file)
-        return ServerTaskLoader(query)
+        return ServerTaskLoader(self.project, task_id, state)
 
     def _create_task_runs_loader(self, json_file):
         if json_file is not None:
@@ -148,18 +133,31 @@ class DataFrameFactory(object):
 
 class ServerTaskLoader(object):
 
-    def __init__(self, query):
-        self.query = query
+    def __init__(self, project, task_id=None, state='completed'):
+        self.query = self._build_query(project, task_id, state)
 
     def load(self):
-        self.tasks = []
-        tasks = pbclient.find_tasks(**self.query)
+        self.tasks = pbclient.find_tasks(**self.query)
+        last_fetched_tasks = self.tasks
         del self.query['offset']
-        while(len(tasks) != 0):
-            self.tasks += tasks
-            self.query['last_id'] = tasks[-1].id
-            tasks = pbclient.find_tasks(**self.query)
+        while(len(last_fetched_tasks) != 0 and len(last_fetched_tasks) == self.query['limit'] and self.query.get('id') is None):
+            self.query['last_id'] = last_fetched_tasks[-1].id
+            last_fetched_tasks = pbclient.find_tasks(**self.query)
+            self.tasks += last_fetched_tasks
         return self.tasks
+
+    def _build_query(self, project, task_id, state):
+        if task_id is not None:
+            query = dict(project_id=project.id,
+                         id=task_id,
+                         limit=1,
+                         offset=0)
+        else:
+            query = dict(project_id=project.id,
+                         state=state,
+                         limit=100,
+                         offset=0)
+        return query
 
 
 class JsonTaskLoader(object):
