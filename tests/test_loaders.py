@@ -15,14 +15,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with PyBossa.  If not, see <http://www.gnu.org/licenses/>.
-"""Package to test Enki package."""
 import enki
 import pbclient
-from enki.exceptions import ProjectNotFound, ProjectError, \
-    ProjectWithoutTasks, ProjectWithoutTaskRuns
 from mock import patch, call
 from base import TestEnki
-from nose.tools import raises
 
 
 class TestServerTaskLoader(TestEnki):
@@ -69,3 +65,35 @@ class TestServerTaskLoader(TestEnki):
 
         assert len(tasks) == 102
         assert fake_client.mock_calls == [call(**first_query), call(**second_query)]
+
+
+class TestJsonTaskLoader(TestEnki):
+    json_file = 'tests/different_tasks.json'
+
+    def test_load_one_task_if_task_id_is_given(self):
+        loader = enki.JsonTaskLoader(project_id=1, json_file=self.json_file,
+                                     task_id=2)
+
+        tasks = loader.load()
+
+        assert len(tasks) == 1, tasks
+        assert tasks[0].id == 2, tasks
+
+    def test_load_returns_project_tasks_when_project_id_in_query(self):
+        loader = enki.JsonTaskLoader(json_file=self.json_file, project_id=1)
+
+        tasks = loader.load()
+
+        assert len(tasks) == 2, tasks
+        for task in tasks:
+            assert task.project_id == 1
+
+    def test_load_returns_tasks_with_state_in_query(self):
+        loader = enki.JsonTaskLoader(project_id=1, json_file=self.json_file,
+                                     state='ongoing')
+
+        tasks = loader.load()
+
+        assert len(tasks) == 2, tasks
+        for task in tasks:
+            assert task.project_id == 1

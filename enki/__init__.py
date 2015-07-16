@@ -100,7 +100,7 @@ class Enki(object):
 
     def _create_task_loader(self, task_id, state, json_file):
         if json_file is not None:
-            return JsonTaskLoader(json_file)
+            return JsonTaskLoader(json_file, self.project.id, task_id, state)
         return ServerTaskLoader(self.project, task_id, state)
 
     def _create_task_runs_loader(self, json_file):
@@ -162,13 +162,20 @@ class ServerTaskLoader(object):
 
 class JsonTaskLoader(object):
 
-    def __init__(self, json_file):
+    def __init__(self, json_file, project_id, task_id=None, state=None):
         self.json_file = json_file
+        self.project_id = project_id
+        self.task_id = task_id
+        self.state = state
 
     def load(self):
         json_file_data = open(self.json_file).read()
         file_tasks = json.loads(json_file_data)
-        return [pbclient.Task(t) for t in file_tasks]
+        if self.task_id is None:
+            return [pbclient.Task(t) for t in file_tasks
+                    if (not self.project_id or self.project_id == t['project_id'])
+                    and (not self.state or self.state == t['state'])]
+        return [pbclient.Task(t) for t in file_tasks if t['id'] == self.task_id]
 
 
 class ServerTaskRunsLoader(object):
