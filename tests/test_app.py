@@ -27,7 +27,7 @@ from nose.tools import raises
 class Test(TestEnki):
     @raises(ProjectNotFound)
     @patch('pbclient.requests.get')
-    def test_00_get_project_not_found(self, Mock):
+    def test_get_project_not_found(self, Mock):
         """Test project not found works."""
         # App does not exist returns an empty list
         Mock.return_value = self.create_fake_request(data=[], status=200)
@@ -35,7 +35,7 @@ class Test(TestEnki):
                   project_short_name='non-exists')
 
     @patch('pbclient.requests.get')
-    def test_01_get_project_found(self, Mock):
+    def test_get_project_found(self, Mock):
         """Test project found works."""
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
@@ -66,7 +66,6 @@ class Test(TestEnki):
         result = e.explode_info(e.tasks[0])
         err_msg = "This item should not be exploded"
         assert 'new_key' not in result.keys(), err_msg
-
 
     @patch('pbclient.requests.get')
     def test_explode_info_with_info_dict(self, Mock):
@@ -130,7 +129,6 @@ class Test(TestEnki):
         assert desc['unique'] == 1, err_msg
         assert desc['top'] == self.task['info'], err_msg
         assert desc['freq'] == 1, err_msg
-
 
     @patch('pbclient.requests.get')
     def test_get_tasks(self, Mock):
