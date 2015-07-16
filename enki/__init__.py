@@ -140,7 +140,7 @@ class ServerTaskLoader(object):
         self.tasks = pbclient.find_tasks(**self.query)
         last_fetched_tasks = self.tasks
         del self.query['offset']
-        while(len(last_fetched_tasks) != 0 and len(last_fetched_tasks) == self.query['limit'] and self.query.get('id') is None):
+        while self._tasks_not_exhausted(last_fetched_tasks):
             self.query['last_id'] = last_fetched_tasks[-1].id
             last_fetched_tasks = pbclient.find_tasks(**self.query)
             self.tasks += last_fetched_tasks
@@ -158,6 +158,11 @@ class ServerTaskLoader(object):
                          limit=100,
                          offset=0)
         return query
+
+    def _tasks_not_exhausted(self, last_fetched_tasks):
+        return (len(last_fetched_tasks) != 0
+            and len(last_fetched_tasks) == self.query['limit']
+            and self.query.get('id') is None)
 
 
 class JsonTaskLoader(object):
