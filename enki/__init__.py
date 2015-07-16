@@ -101,7 +101,7 @@ class Enki(object):
     def _create_task_loader(self, task_id, state, json_file):
         if json_file is not None:
             return JsonTaskLoader(json_file, self.project.id, task_id, state)
-        return ServerTaskLoader(self.project, task_id, state)
+        return ServerTaskLoader(self.project.id, task_id, state)
 
     def _create_task_runs_loader(self, json_file):
         if json_file is not None:
@@ -133,8 +133,8 @@ class DataFrameFactory(object):
 
 class ServerTaskLoader(object):
 
-    def __init__(self, project, task_id=None, state='completed'):
-        self.query = self._build_query(project, task_id, state)
+    def __init__(self, project_id, task_id=None, state='completed'):
+        self.query = self._build_query(project_id, task_id, state)
 
     def load(self):
         self.tasks = pbclient.find_tasks(**self.query)
@@ -146,14 +146,14 @@ class ServerTaskLoader(object):
             self.tasks += last_fetched_tasks
         return self.tasks
 
-    def _build_query(self, project, task_id, state):
+    def _build_query(self, project_id, task_id, state):
         if task_id is not None:
-            query = dict(project_id=project.id,
+            query = dict(project_id=project_id,
                          id=task_id,
                          limit=1,
                          offset=0)
         else:
-            query = dict(project_id=project.id,
+            query = dict(project_id=project_id,
                          state=state,
                          limit=100,
                          offset=0)

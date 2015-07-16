@@ -31,7 +31,7 @@ class TestServerTaskLoader(TestEnki):
         project = pbclient.Project(self.project)
         query = dict(project_id=task.project_id, id=task.id, limit=1, offset=0)
 
-        loader = enki.ServerTaskLoader(project, task.id)
+        loader = enki.ServerTaskLoader(project.id, task.id)
         tasks = loader.load()
 
         assert tasks[0] == task
@@ -44,7 +44,7 @@ class TestServerTaskLoader(TestEnki):
         response = [pbclient.Task({'id': n}) for n in range(2)]
         fake_client.side_effect = [response]
 
-        loader = enki.ServerTaskLoader(project)
+        loader = enki.ServerTaskLoader(project.id)
         tasks = loader.load()
 
         assert len(tasks) == len(response)
@@ -60,7 +60,7 @@ class TestServerTaskLoader(TestEnki):
         second_response = [pbclient.Task({'id': 100+n}) for n in range(2)]
         fake_client.side_effect = [first_response, second_response]
 
-        loader = enki.ServerTaskLoader(project)
+        loader = enki.ServerTaskLoader(project.id)
         tasks = loader.load()
 
         assert len(tasks) == 102
