@@ -191,10 +191,9 @@ class ServerTaskRunsLoader(object):
 
     def load(self):
         self.task_runs = {}
-        self.task_runs_file = []
 
         self._load_from_server()
-        return (self.task_runs, self.task_runs_file)
+        return (self.task_runs, None)
 
     def _load_from_server(self):
         for t in self.tasks:
