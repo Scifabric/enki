@@ -24,14 +24,14 @@ from base import TestEnki
 class TestServerTasksLoader(TestEnki):
 
     @patch('pbclient.find_tasks')
-    def test_load_one_task_if_task_id_is_given(self, fake_client):
-        task_data = {'id': 1, 'project_id': 1, 'state': 'completed'}
+    def test_load_does_one_request_to_get_specified_task_if_id_given(self, fake_client):
+        project_id = 1
+        task_data = {'id': 1, 'project_id': project_id, 'state': 'completed'}
         task = pbclient.Task(task_data)
         fake_client.side_effect = [[task]]
-        project = pbclient.Project(self.project)
         query = dict(project_id=task.project_id, id=task.id, limit=1, offset=0)
 
-        loader = enki.ServerTasksLoader(project.id, task.id)
+        loader = enki.ServerTasksLoader(project_id, task.id)
         tasks = loader.load()
 
         assert tasks[0] == task
@@ -64,7 +64,7 @@ class TestServerTasksLoader(TestEnki):
         tasks = loader.load()
 
         assert len(tasks) == 102
-        assert fake_client.mock_calls == [call(**first_query), call(**second_query)]
+        assert fake_client.mock_calls[1] == call(**second_query)
 
 
 class TestJsonTasksLoader(object):
@@ -80,13 +80,12 @@ class TestJsonTasksLoader(object):
         assert tasks[0].id == 2, tasks
 
     def test_load_returns_project_tasks_when_project_id_in_query(self):
-        loader = enki.JsonTasksLoader(json_file=self.json_file, project_id=1)
+        loader = enki.JsonTasksLoader(json_file=self.json_file, project_id=2)
 
         tasks = loader.load()
 
         assert len(tasks) == 2, tasks
-        for task in tasks:
-            assert task.project_id == 1
+        assert_all_tasks_belong_to_project(tasks, project_id=2)
 
     def test_load_returns_tasks_with_state_in_query(self):
         loader = enki.JsonTasksLoader(project_id=1, json_file=self.json_file,
@@ -95,8 +94,7 @@ class TestJsonTasksLoader(object):
         tasks = loader.load()
 
         assert len(tasks) == 2, tasks
-        for task in tasks:
-            assert task.project_id == 1
+        assert_all_tasks_belong_to_project(tasks, project_id=1)
 
 
 class TestServerTaskRunsLoader(object):
@@ -125,9 +123,7 @@ class TestServerTaskRunsLoader(object):
         task_runs, _ = loader.load()
 
         assert len(task_runs) == 2
-        for task in task_runs.keys():
-            for task_run in task_runs[task]:
-                assert task == task_run.task_id, task_runs
+        assert_task_runs_grouped_by_task(task_runs)
 
     @patch('pbclient.find_taskruns')
     def test_load_uses_keyset_pagination(self, fake_client):
@@ -143,3 +139,14 @@ class TestServerTaskRunsLoader(object):
         tasks = loader.load()
 
         assert fake_client.mock_calls == [call(**first_query), call(**second_query)]
+
+
+
+def assert_all_tasks_belong_to_project(tasks, project_id):
+    for task in tasks:
+        assert task.project_id == project_id
+
+def assert_task_runs_grouped_by_task(task_runs):
+    for task in task_runs.keys():
+        for task_run in task_runs[task]:
+            assert task == task_run.task_id, task_runs
