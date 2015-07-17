@@ -190,27 +190,24 @@ class ServerTaskRunsLoader(object):
         self.tasks = tasks
 
     def load(self):
-        self.task_runs = {}
+        task_runs = {}
 
-        self._load_from_server()
-        return (self.task_runs, None)
-
-    def _load_from_server(self):
         for t in self.tasks:
             limit = 100
-            self.task_runs[t.id] = []
+            task_runs[t.id] = []
             taskruns = pbclient.find_taskruns(project_id=self.project_id,
                                               task_id=t.id,
                                               limit=limit,
                                               offset=0)
             while(len(taskruns) != 0):
-                self.task_runs[t.id] += taskruns
+                task_runs[t.id] += taskruns
                 last_id = taskruns[-1].id
                 taskruns = pbclient.find_taskruns(
                     project_id=self.project_id,
                     task_id=t.id,
                     limit=limit,
                     last_id=last_id)
+        return (task_runs, None)
 
 
 class JsonTaskRunsLoader(object):
@@ -224,12 +221,9 @@ class JsonTaskRunsLoader(object):
         self.task_runs = {}
         self.task_runs_file = []
 
-        self._load_from_file()
-        return (self.task_runs, self.task_runs_file)
-
-    def _load_from_file(self):
         self._load_from_json()
         self._group_json_task_runs_by_task_id()
+        return (self.task_runs, self.task_runs_file)
 
     def _load_from_json(self):
         json_file_data = open(self.json_file).read()
