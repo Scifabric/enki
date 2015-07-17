@@ -21,7 +21,7 @@ from mock import patch, call
 from base import TestEnki
 
 
-class TestServerTaskLoader(TestEnki):
+class TestServerTasksLoader(TestEnki):
 
     @patch('pbclient.find_tasks')
     def test_load_one_task_if_task_id_is_given(self, fake_client):
@@ -31,7 +31,7 @@ class TestServerTaskLoader(TestEnki):
         project = pbclient.Project(self.project)
         query = dict(project_id=task.project_id, id=task.id, limit=1, offset=0)
 
-        loader = enki.ServerTaskLoader(project.id, task.id)
+        loader = enki.ServerTasksLoader(project.id, task.id)
         tasks = loader.load()
 
         assert tasks[0] == task
@@ -44,7 +44,7 @@ class TestServerTaskLoader(TestEnki):
         response = [pbclient.Task({'id': n}) for n in range(2)]
         fake_client.side_effect = [response]
 
-        loader = enki.ServerTaskLoader(project.id)
+        loader = enki.ServerTasksLoader(project.id)
         tasks = loader.load()
 
         assert len(tasks) == len(response)
@@ -60,18 +60,18 @@ class TestServerTaskLoader(TestEnki):
         second_response = [pbclient.Task({'id': 100+n}) for n in range(2)]
         fake_client.side_effect = [first_response, second_response]
 
-        loader = enki.ServerTaskLoader(project.id)
+        loader = enki.ServerTasksLoader(project.id)
         tasks = loader.load()
 
         assert len(tasks) == 102
         assert fake_client.mock_calls == [call(**first_query), call(**second_query)]
 
 
-class TestJsonTaskLoader(TestEnki):
+class TestJsonTasksLoader(object):
     json_file = 'tests/different_tasks.json'
 
     def test_load_one_task_if_task_id_is_given(self):
-        loader = enki.JsonTaskLoader(project_id=1, json_file=self.json_file,
+        loader = enki.JsonTasksLoader(project_id=1, json_file=self.json_file,
                                      task_id=2)
 
         tasks = loader.load()
@@ -80,7 +80,7 @@ class TestJsonTaskLoader(TestEnki):
         assert tasks[0].id == 2, tasks
 
     def test_load_returns_project_tasks_when_project_id_in_query(self):
-        loader = enki.JsonTaskLoader(json_file=self.json_file, project_id=1)
+        loader = enki.JsonTasksLoader(json_file=self.json_file, project_id=1)
 
         tasks = loader.load()
 
@@ -89,7 +89,7 @@ class TestJsonTaskLoader(TestEnki):
             assert task.project_id == 1
 
     def test_load_returns_tasks_with_state_in_query(self):
-        loader = enki.JsonTaskLoader(project_id=1, json_file=self.json_file,
+        loader = enki.JsonTasksLoader(project_id=1, json_file=self.json_file,
                                      state='ongoing')
 
         tasks = loader.load()

@@ -100,8 +100,8 @@ class Enki(object):
 
     def _create_task_loader(self, task_id, state, json_file):
         if json_file is not None:
-            return JsonTaskLoader(json_file, self.project.id, task_id, state)
-        return ServerTaskLoader(self.project.id, task_id, state)
+            return JsonTasksLoader(json_file, self.project.id, task_id, state)
+        return ServerTasksLoader(self.project.id, task_id, state)
 
     def _create_task_runs_loader(self, json_file):
         if json_file is not None:
@@ -131,7 +131,7 @@ class DataFrameFactory(object):
         return item_data
 
 
-class ServerTaskLoader(object):
+class ServerTasksLoader(object):
 
     def __init__(self, project_id, task_id=None, state='completed'):
         self.query = self._build_query(project_id, task_id, state)
@@ -165,7 +165,7 @@ class ServerTaskLoader(object):
                 and self.query.get('id') is None)
 
 
-class JsonTaskLoader(object):
+class JsonTasksLoader(object):
 
     def __init__(self, json_file, project_id, task_id=None, state=None):
         self.json_file = json_file
