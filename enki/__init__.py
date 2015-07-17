@@ -161,8 +161,8 @@ class ServerTaskLoader(object):
 
     def _tasks_not_exhausted(self, last_fetched_tasks):
         return (len(last_fetched_tasks) != 0
-            and len(last_fetched_tasks) == self.query['limit']
-            and self.query.get('id') is None)
+                and len(last_fetched_tasks) == self.query['limit']
+                and self.query.get('id') is None)
 
 
 class JsonTaskLoader(object):
@@ -192,7 +192,6 @@ class ServerTaskRunsLoader(object):
     def load(self):
         self.task_runs = {}
         self.task_runs_file = []
-        self.task_runs_df = {}
 
         self._load_from_server()
         return (self.task_runs, self.task_runs_file)
@@ -225,7 +224,6 @@ class JsonTaskRunsLoader(object):
     def load(self):
         self.task_runs = {}
         self.task_runs_file = []
-        self.task_runs_df = {}
 
         self._load_from_file()
         return (self.task_runs, self.task_runs_file)
