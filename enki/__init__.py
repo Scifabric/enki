@@ -105,8 +105,8 @@ class Enki(object):
 
     def _create_task_runs_loader(self, json_file):
         if json_file is not None:
-            return JsonTaskRunsLoader(self.project, self.tasks, json_file)
-        return ServerTaskRunsLoader(self.project, self.tasks)
+            return JsonTaskRunsLoader(self.project.id, self.tasks, json_file)
+        return ServerTaskRunsLoader(self.project.id, self.tasks)
 
 
 class DataFrameFactory(object):
@@ -185,8 +185,8 @@ class JsonTasksLoader(object):
 
 class ServerTaskRunsLoader(object):
 
-    def __init__(self, project, tasks):
-        self.project = project
+    def __init__(self, project_id, tasks):
+        self.project_id = project_id
         self.tasks = tasks
 
     def load(self):
@@ -199,7 +199,7 @@ class ServerTaskRunsLoader(object):
         for t in self.tasks:
             limit = 100
             self.task_runs[t.id] = []
-            taskruns = pbclient.find_taskruns(project_id=self.project.id,
+            taskruns = pbclient.find_taskruns(project_id=self.project_id,
                                               task_id=t.id,
                                               limit=limit,
                                               offset=0)
@@ -207,7 +207,7 @@ class ServerTaskRunsLoader(object):
                 self.task_runs[t.id] += taskruns
                 last_id = taskruns[-1].id
                 taskruns = pbclient.find_taskruns(
-                    project_id=self.project.id,
+                    project_id=self.project_id,
                     task_id=t.id,
                     limit=limit,
                     last_id=last_id)
@@ -215,8 +215,8 @@ class ServerTaskRunsLoader(object):
 
 class JsonTaskRunsLoader(object):
 
-    def __init__(self, project, tasks, json_file):
-        self.project = project
+    def __init__(self, project_id, tasks, json_file):
+        self.project_id = project_id
         self.tasks = tasks
         self.json_file = json_file
 
@@ -242,4 +242,4 @@ class JsonTaskRunsLoader(object):
             self.task_runs[t.id] = [tr for tr in self.task_runs_file
                                     if (tr.task_id == t.id
                                         and
-                                        tr.project_id == self.project.id)]
+                                        tr.project_id == self.project_id)]
