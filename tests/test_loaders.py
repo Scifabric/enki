@@ -141,6 +141,29 @@ class TestServerTaskRunsLoader(object):
         assert fake_client.mock_calls == [call(**first_query), call(**second_query)]
 
 
+class TestJsonTaskRunsLoader(object):
+    json_file = 'tests/different_task_runs.json'
+
+    def test_load_returns_empty_dict_if_no_tasks(self):
+        loader = enki.JsonTaskRunsLoader(project_id=1, tasks=[],
+                                         json_file=self.json_file)
+
+        task_runs, _ = loader.load()
+
+        assert task_runs == {}, task_runs
+
+    def test_load_returns_dict_with_taskruns_for_each_task(self):
+        tasks = [pbclient.Task({'id': 1, 'project_id': 1}),
+                 pbclient.Task({'id': 2, 'project_id': 1})]
+        loader = enki.JsonTaskRunsLoader(project_id=1, tasks=tasks,
+                                         json_file=self.json_file)
+
+        task_runs, _ = loader.load()
+
+        assert len(task_runs) == 2
+        assert_task_runs_grouped_by_task(task_runs)
+
+
 
 def assert_all_tasks_belong_to_project(tasks, project_id):
     for task in tasks:

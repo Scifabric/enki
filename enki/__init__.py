@@ -235,5 +235,4 @@ class JsonTaskRunsLoader(object):
         for t in self.tasks:
             self.task_runs[t.id] = [tr for tr in self.task_runs_file
                                     if (tr.task_id == t.id
-                                        and
-                                        tr.project_id == self.project_id)]
+                                    and tr.project_id == self.project_id)]
