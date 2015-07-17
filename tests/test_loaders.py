@@ -97,3 +97,49 @@ class TestJsonTasksLoader(object):
         assert len(tasks) == 2, tasks
         for task in tasks:
             assert task.project_id == 1
+
+
+class TestServerTaskRunsLoader(object):
+
+    @patch('pbclient.find_taskruns')
+    def test_load_returns_empty_dict_if_no_tasks(self, fake_client):
+        loader = enki.ServerTaskRunsLoader(project_id=1, tasks=[])
+        fake_client.return_value = [pbclient.TaskRun({'id':1, 'project_id': 1})]
+
+        task_runs, _ = loader.load()
+
+        assert task_runs == {}
+
+    @patch('pbclient.find_taskruns')
+    def test_load_returns_dict_with_taskruns_for_each_task(self, fake_client):
+        tasks = [pbclient.Task({'id': 1}), pbclient.Task({'id': 2})]
+        loader = enki.ServerTaskRunsLoader(project_id=1, tasks=tasks)
+        fake_client.side_effect = [
+            [pbclient.TaskRun({'id': 1, 'task_id': 1, 'project_id': 1}),
+             pbclient.TaskRun({'id': 2, 'task_id': 1, 'project_id': 1})],
+            [],
+            [pbclient.TaskRun({'id': 3, 'task_id': 2, 'project_id': 1}),
+             pbclient.TaskRun({'id': 4, 'task_id': 2, 'project_id': 1})],
+            []]
+
+        task_runs, _ = loader.load()
+
+        assert len(task_runs) == 2
+        for task in task_runs.keys():
+            for task_run in task_runs[task]:
+                assert task == task_run.task_id, task_runs
+
+    @patch('pbclient.find_taskruns')
+    def test_load_uses_keyset_pagination(self, fake_client):
+        tasks = [pbclient.Task({'id': 1})]
+        loader = enki.ServerTaskRunsLoader(project_id=1, tasks=tasks)
+        fake_client.side_effect = [
+            [pbclient.TaskRun({'id': 1, 'task_id': 1, 'project_id': 1}),
+             pbclient.TaskRun({'id': 2, 'task_id': 1, 'project_id': 1})],
+            []]
+        first_query = dict(limit=100, offset=0, project_id=1, task_id=1)
+        second_query = dict(last_id=2, limit=100, project_id=1, task_id=1)
+
+        tasks = loader.load()
+
+        assert fake_client.mock_calls == [call(**first_query), call(**second_query)]
