@@ -22,10 +22,10 @@ This module exports:
     * Enki Class: to import an project, its tasks and task runs
 
 """
-import pandas
 import pbclient
 from task_loaders import create_tasks_loader
 from task_run_loaders import create_task_runs_loader
+from dataframer import DataFramer
 from exceptions import ProjectNotFound, ProjectError, \
     ProjectWithoutTasks, ProjectWithoutTaskRuns
 
@@ -52,7 +52,7 @@ class Enki(object):
 
     def explode_info(self, item):
         """Return the a dict of the object but with info field exploded."""
-        return DataFrameFactory().explode_info(item)
+        return DataFramer().explode_info(item)
 
     def get_tasks(self, task_id=None, state='completed', json_file=None):
         """Load all project Tasks."""
@@ -63,7 +63,7 @@ class Enki(object):
         self.tasks = loader.load()
 
         self._check_project_has_tasks()
-        self.tasks_df = DataFrameFactory().create_data_frame(self.tasks)
+        self.tasks_df = DataFramer().create_data_frame(self.tasks)
 
     def get_task_runs(self, json_file=None):
         """Load all project Task Runs from Tasks."""
@@ -73,7 +73,7 @@ class Enki(object):
         self.task_runs, self.task_runs_file = loader.load()
 
         self._check_project_has_taskruns()
-        self.task_runs_df = DataFrameFactory().create_task_run_data_frames(self.tasks, self.task_runs)
+        self.task_runs_df = DataFramer().create_task_run_data_frames(self.tasks, self.task_runs)
 
     def get_all(self):  # pragma: no cover
         """Get task and task_runs from project."""
@@ -94,29 +94,7 @@ class Enki(object):
             raise ProjectWithoutTasks
 
     def _check_project_has_taskruns(self):
-        add_number_task_runs = lambda total, task_runs: total + len(task_runs)
-        total_task_runs = reduce(add_number_task_runs, self.task_runs.values(), 0)
+        count_task_runs = lambda total, task_runs: total + len(task_runs)
+        total_task_runs = reduce(count_task_runs, self.task_runs.values(), 0)
         if total_task_runs == 0:
             raise ProjectWithoutTaskRuns
-
-
-class DataFrameFactory(object):
-
-    def create_task_run_data_frames(self, tasks, task_runs):
-        task_runs_df = {}
-        for task in tasks:
-            task_runs_df[task.id] = self.create_data_frame(task_runs[task.id])
-        return task_runs_df
-
-    def create_data_frame(self, item):
-        data = [self.explode_info(tr) for tr in item]
-        index = [tr.__dict__['data']['id'] for tr in item]
-        return pandas.DataFrame(data, index)
-
-    def explode_info(self, item):
-        item_data = item.__dict__['data']
-        if type(item.info) == dict:
-            keys = item_data['info'].keys()
-            for k in keys:
-                item_data[k] = item_data['info'][k]
-        return item_data
