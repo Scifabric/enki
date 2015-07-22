@@ -24,8 +24,8 @@ This module exports:
 """
 import pandas
 import pbclient
-from task_loaders import ServerTasksLoader, JsonTasksLoader
-from task_run_loaders import ServerTaskRunsLoader, JsonTaskRunsLoader
+from task_loaders import create_tasks_loader
+from task_run_loaders import create_task_runs_loader
 from exceptions import ProjectNotFound, ProjectError, \
     ProjectWithoutTasks, ProjectWithoutTaskRuns
 
@@ -59,7 +59,7 @@ class Enki(object):
         if self.project is None:
             raise ProjectError
 
-        loader = self._create_tasks_loader(task_id, state, json_file)
+        loader = create_tasks_loader(self.project.id, task_id, state, json_file)
         self.tasks = loader.load()
 
         self._check_project_has_tasks()
@@ -69,7 +69,7 @@ class Enki(object):
         """Load all project Task Runs from Tasks."""
         if self.project is None:
             raise ProjectError
-        loader = self._create_task_runs_loader(json_file)
+        loader = create_task_runs_loader(self.project.id, self.tasks, json_file)
         self.task_runs, self.task_runs_file = loader.load()
 
         self._check_project_has_taskruns()
@@ -98,16 +98,6 @@ class Enki(object):
         total_task_runs = reduce(add_number_task_runs, self.task_runs.values(), 0)
         if total_task_runs == 0:
             raise ProjectWithoutTaskRuns
-
-    def _create_tasks_loader(self, task_id, state, json_file):
-        if json_file is not None:
-            return JsonTasksLoader(json_file, self.project.id, task_id, state)
-        return ServerTasksLoader(self.project.id, task_id, state)
-
-    def _create_task_runs_loader(self, json_file):
-        if json_file is not None:
-            return JsonTaskRunsLoader(self.project.id, self.tasks, json_file)
-        return ServerTaskRunsLoader(self.project.id, self.tasks)
 
 
 class DataFrameFactory(object):

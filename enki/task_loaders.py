@@ -69,3 +69,9 @@ class JsonTasksLoader(object):
                     if (not self.project_id or self.project_id == t['project_id'])
                     and (not self.state or self.state == t['state'])]
         return [pbclient.Task(t) for t in file_tasks if t['id'] == self.task_id]
+
+
+def create_tasks_loader(project_id, task_id, state, json_file):
+    if json_file is not None:
+        return JsonTasksLoader(json_file, project_id, task_id, state)
+    return ServerTasksLoader(project_id, task_id, state)

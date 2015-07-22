@@ -15,10 +15,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with PyBossa.  If not, see <http://www.gnu.org/licenses/>.
-import enki
 import pbclient
 from mock import patch, call
 from base import TestEnki
+from enki.task_loaders import ServerTasksLoader, JsonTasksLoader
+from enki.task_run_loaders import ServerTaskRunsLoader, JsonTaskRunsLoader
 
 
 class TestServerTasksLoader(TestEnki):
@@ -31,7 +32,7 @@ class TestServerTasksLoader(TestEnki):
         fake_client.side_effect = [[task]]
         query = dict(project_id=task.project_id, id=task.id, limit=1, offset=0)
 
-        loader = enki.ServerTasksLoader(project_id, task.id)
+        loader = ServerTasksLoader(project_id, task.id)
         tasks = loader.load()
 
         assert tasks[0] == task
@@ -44,7 +45,7 @@ class TestServerTasksLoader(TestEnki):
         response = [pbclient.Task({'id': n}) for n in range(2)]
         fake_client.side_effect = [response]
 
-        loader = enki.ServerTasksLoader(project.id)
+        loader = ServerTasksLoader(project.id)
         tasks = loader.load()
 
         assert len(tasks) == len(response)
@@ -60,7 +61,7 @@ class TestServerTasksLoader(TestEnki):
         second_response = [pbclient.Task({'id': 100+n}) for n in range(2)]
         fake_client.side_effect = [first_response, second_response]
 
-        loader = enki.ServerTasksLoader(project.id)
+        loader = ServerTasksLoader(project.id)
         tasks = loader.load()
 
         assert len(tasks) == 102
@@ -71,7 +72,7 @@ class TestJsonTasksLoader(object):
     json_file = 'tests/different_tasks.json'
 
     def test_load_one_task_if_task_id_is_given(self):
-        loader = enki.JsonTasksLoader(project_id=1, json_file=self.json_file,
+        loader = JsonTasksLoader(project_id=1, json_file=self.json_file,
                                      task_id=2)
 
         tasks = loader.load()
@@ -80,7 +81,7 @@ class TestJsonTasksLoader(object):
         assert tasks[0].id == 2, tasks
 
     def test_load_returns_project_tasks_when_project_id_in_query(self):
-        loader = enki.JsonTasksLoader(json_file=self.json_file, project_id=2)
+        loader = JsonTasksLoader(json_file=self.json_file, project_id=2)
 
         tasks = loader.load()
 
@@ -88,8 +89,9 @@ class TestJsonTasksLoader(object):
         assert_all_tasks_belong_to_project(tasks, project_id=2)
 
     def test_load_returns_tasks_with_state_in_query(self):
-        loader = enki.JsonTasksLoader(project_id=1, json_file=self.json_file,
-                                     state='ongoing')
+        loader = JsonTasksLoader(project_id=1,
+                                              json_file=self.json_file,
+                                              state='ongoing')
 
         tasks = loader.load()
 
@@ -101,7 +103,7 @@ class TestServerTaskRunsLoader(object):
 
     @patch('pbclient.find_taskruns')
     def test_load_returns_empty_dict_if_no_tasks(self, fake_client):
-        loader = enki.ServerTaskRunsLoader(project_id=1, tasks=[])
+        loader = ServerTaskRunsLoader(project_id=1, tasks=[])
         fake_client.return_value = [pbclient.TaskRun({'id':1, 'project_id': 1})]
 
         task_runs, _ = loader.load()
@@ -111,7 +113,7 @@ class TestServerTaskRunsLoader(object):
     @patch('pbclient.find_taskruns')
     def test_load_returns_dict_with_taskruns_for_each_task(self, fake_client):
         tasks = [pbclient.Task({'id': 1}), pbclient.Task({'id': 2})]
-        loader = enki.ServerTaskRunsLoader(project_id=1, tasks=tasks)
+        loader = ServerTaskRunsLoader(project_id=1, tasks=tasks)
         fake_client.side_effect = [
             [pbclient.TaskRun({'id': 1, 'task_id': 1, 'project_id': 1}),
              pbclient.TaskRun({'id': 2, 'task_id': 1, 'project_id': 1})],
@@ -128,7 +130,7 @@ class TestServerTaskRunsLoader(object):
     @patch('pbclient.find_taskruns')
     def test_load_uses_keyset_pagination(self, fake_client):
         tasks = [pbclient.Task({'id': 1})]
-        loader = enki.ServerTaskRunsLoader(project_id=1, tasks=tasks)
+        loader = ServerTaskRunsLoader(project_id=1, tasks=tasks)
         fake_client.side_effect = [
             [pbclient.TaskRun({'id': 1, 'task_id': 1, 'project_id': 1}),
              pbclient.TaskRun({'id': 2, 'task_id': 1, 'project_id': 1})],
@@ -145,7 +147,7 @@ class TestJsonTaskRunsLoader(object):
     json_file = 'tests/different_task_runs.json'
 
     def test_load_returns_empty_dict_if_no_tasks(self):
-        loader = enki.JsonTaskRunsLoader(project_id=1, tasks=[],
+        loader = JsonTaskRunsLoader(project_id=1, tasks=[],
                                          json_file=self.json_file)
 
         task_runs, _ = loader.load()
@@ -155,7 +157,7 @@ class TestJsonTaskRunsLoader(object):
     def test_load_returns_dict_with_taskruns_for_each_task(self):
         tasks = [pbclient.Task({'id': 1, 'project_id': 1}),
                  pbclient.Task({'id': 2, 'project_id': 1})]
-        loader = enki.JsonTaskRunsLoader(project_id=1, tasks=tasks,
+        loader = JsonTaskRunsLoader(project_id=1, tasks=tasks,
                                          json_file=self.json_file)
 
         task_runs, _ = loader.load()
