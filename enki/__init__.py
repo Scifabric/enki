@@ -24,7 +24,8 @@ This module exports:
 """
 import pandas
 import pbclient
-import json
+from task_loaders import ServerTasksLoader, JsonTasksLoader
+from task_run_loaders import ServerTaskRunsLoader, JsonTaskRunsLoader
 from exceptions import ProjectNotFound, ProjectError, \
     ProjectWithoutTasks, ProjectWithoutTaskRuns
 
@@ -58,7 +59,7 @@ class Enki(object):
         if self.project is None:
             raise ProjectError
 
-        loader = self._create_task_loader(task_id, state, json_file)
+        loader = self._create_tasks_loader(task_id, state, json_file)
         self.tasks = loader.load()
 
         self._check_project_has_tasks()
@@ -98,7 +99,7 @@ class Enki(object):
         if total_task_runs == 0:
             raise ProjectWithoutTaskRuns
 
-    def _create_task_loader(self, task_id, state, json_file):
+    def _create_tasks_loader(self, task_id, state, json_file):
         if json_file is not None:
             return JsonTasksLoader(json_file, self.project.id, task_id, state)
         return ServerTasksLoader(self.project.id, task_id, state)
@@ -129,110 +130,3 @@ class DataFrameFactory(object):
             for k in keys:
                 item_data[k] = item_data['info'][k]
         return item_data
-
-
-class ServerTasksLoader(object):
-
-    def __init__(self, project_id, task_id=None, state='completed'):
-        self.query = self._build_query(project_id, task_id, state)
-
-    def load(self):
-        self.tasks = pbclient.find_tasks(**self.query)
-        last_fetched_tasks = self.tasks
-        del self.query['offset']
-        while self._tasks_not_exhausted(last_fetched_tasks):
-            self.query['last_id'] = last_fetched_tasks[-1].id
-            last_fetched_tasks = pbclient.find_tasks(**self.query)
-            self.tasks += last_fetched_tasks
-        return self.tasks
-
-    def _build_query(self, project_id, task_id, state):
-        if task_id is not None:
-            query = dict(project_id=project_id,
-                         id=task_id,
-                         limit=1,
-                         offset=0)
-        else:
-            query = dict(project_id=project_id,
-                         state=state,
-                         limit=100,
-                         offset=0)
-        return query
-
-    def _tasks_not_exhausted(self, last_fetched_tasks):
-        return (len(last_fetched_tasks) != 0
-                and len(last_fetched_tasks) == self.query['limit']
-                and self.query.get('id') is None)
-
-
-class JsonTasksLoader(object):
-
-    def __init__(self, json_file, project_id, task_id=None, state=None):
-        self.json_file = json_file
-        self.project_id = project_id
-        self.task_id = task_id
-        self.state = state
-
-    def load(self):
-        json_file_data = open(self.json_file).read()
-        file_tasks = json.loads(json_file_data)
-        if self.task_id is None:
-            return [pbclient.Task(t) for t in file_tasks
-                    if (not self.project_id or self.project_id == t['project_id'])
-                    and (not self.state or self.state == t['state'])]
-        return [pbclient.Task(t) for t in file_tasks if t['id'] == self.task_id]
-
-
-class ServerTaskRunsLoader(object):
-
-    def __init__(self, project_id, tasks):
-        self.project_id = project_id
-        self.tasks = tasks
-
-    def load(self):
-        task_runs = {}
-
-        for t in self.tasks:
-            limit = 100
-            task_runs[t.id] = []
-            taskruns = pbclient.find_taskruns(project_id=self.project_id,
-                                              task_id=t.id,
-                                              limit=limit,
-                                              offset=0)
-            while(len(taskruns) != 0):
-                task_runs[t.id] += taskruns
-                last_id = taskruns[-1].id
-                taskruns = pbclient.find_taskruns(
-                    project_id=self.project_id,
-                    task_id=t.id,
-                    limit=limit,
-                    last_id=last_id)
-        return (task_runs, None)
-
-
-class JsonTaskRunsLoader(object):
-
-    def __init__(self, project_id, tasks, json_file):
-        self.project_id = project_id
-        self.tasks = tasks
-        self.json_file = json_file
-
-    def load(self):
-        self.task_runs = {}
-        self.task_runs_file = []
-
-        self._load_from_json()
-        self._group_json_task_runs_by_task_id()
-        return (self.task_runs, self.task_runs_file)
-
-    def _load_from_json(self):
-        json_file_data = open(self.json_file).read()
-        file_task_runs = json.loads(json_file_data)
-        for tr in file_task_runs:
-            self.task_runs_file.append(pbclient.TaskRun(tr))
-
-    def _group_json_task_runs_by_task_id(self):
-        for t in self.tasks:
-            self.task_runs[t.id] = [tr for tr in self.task_runs_file
-                                    if (tr.task_id == t.id
-                                    and tr.project_id == self.project_id)]
