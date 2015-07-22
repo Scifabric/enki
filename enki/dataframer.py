@@ -18,23 +18,24 @@
 
 import pandas
 
-class DataFramer(object):
 
-    def create_task_run_data_frames(self, tasks, task_runs):
-        task_runs_df = {}
-        for task in tasks:
-            task_runs_df[task.id] = self.create_data_frame(task_runs[task.id])
-        return task_runs_df
+def create_task_run_data_frames(tasks, task_runs):
+    task_runs_df = {}
+    for task in tasks:
+        task_runs_df[task.id] = create_data_frame(task_runs[task.id])
+    return task_runs_df
 
-    def create_data_frame(self, item):
-        data = [self.explode_info(tr) for tr in item]
-        index = [tr.__dict__['data']['id'] for tr in item]
-        return pandas.DataFrame(data, index)
 
-    def explode_info(self, item):
-        item_data = item.__dict__['data']
-        if type(item.info) == dict:
-            keys = item_data['info'].keys()
-            for k in keys:
-                item_data[k] = item_data['info'][k]
-        return item_data
+def create_data_frame(item):
+    data = [explode_info(tr) for tr in item]
+    index = [tr.__dict__['data']['id'] for tr in item]
+    return pandas.DataFrame(data, index)
+
+
+def explode_info(item):
+    item_data = item.__dict__['data']
+    if type(item.info) == dict:
+        keys = item_data['info'].keys()
+        for k in keys:
+            item_data[k] = item_data['info'][k]
+    return item_data

@@ -25,7 +25,7 @@ This module exports:
 import pbclient
 from task_loaders import create_tasks_loader
 from task_run_loaders import create_task_runs_loader
-from dataframer import DataFramer
+import dataframer
 from exceptions import ProjectNotFound, ProjectError, \
     ProjectWithoutTasks, ProjectWithoutTaskRuns
 
@@ -52,7 +52,7 @@ class Enki(object):
 
     def explode_info(self, item):
         """Return the a dict of the object but with info field exploded."""
-        return DataFramer().explode_info(item)
+        return dataframer.explode_info(item)
 
     def get_tasks(self, task_id=None, state='completed', json_file=None):
         """Load all project Tasks."""
@@ -63,7 +63,7 @@ class Enki(object):
         self.tasks = loader.load()
 
         self._check_project_has_tasks()
-        self.tasks_df = DataFramer().create_data_frame(self.tasks)
+        self.tasks_df = dataframer.create_data_frame(self.tasks)
 
     def get_task_runs(self, json_file=None):
         """Load all project Task Runs from Tasks."""
@@ -73,7 +73,7 @@ class Enki(object):
         self.task_runs, self.task_runs_file = loader.load()
 
         self._check_project_has_taskruns()
-        self.task_runs_df = DataFramer().create_task_run_data_frames(self.tasks, self.task_runs)
+        self.task_runs_df = dataframer.create_task_run_data_frames(self.tasks, self.task_runs)
 
     def get_all(self):  # pragma: no cover
         """Get task and task_runs from project."""
