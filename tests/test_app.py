@@ -27,7 +27,7 @@ from nose.tools import raises
 class Test(TestEnki):
     @raises(ProjectNotFound)
     @patch('pbclient.requests.get')
-    def test_00_get_project_not_found(self, Mock):
+    def test_get_project_not_found(self, Mock):
         """Test project not found works."""
         # App does not exist returns an empty list
         Mock.return_value = self.create_fake_request(data=[], status=200)
@@ -35,7 +35,7 @@ class Test(TestEnki):
                   project_short_name='non-exists')
 
     @patch('pbclient.requests.get')
-    def test_01_get_project_found(self, Mock):
+    def test_get_project_found(self, Mock):
         """Test project found works."""
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
@@ -62,11 +62,10 @@ class Test(TestEnki):
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
                       project_short_name=self.project['short_name'])
-        e.get_tasks(json_file='test_task_no_dict.json')
+        e.get_tasks(json_file='tests/task_no_dict.json')
         result = e.explode_info(e.tasks[0])
         err_msg = "This item should not be exploded"
         assert 'new_key' not in result.keys(), err_msg
-
 
     @patch('pbclient.requests.get')
     def test_explode_info_with_info_dict(self, Mock):
@@ -87,7 +86,7 @@ class Test(TestEnki):
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
                       project_short_name=self.project['short_name'])
-        e.get_tasks(json_file='test_task.json')
+        e.get_tasks(json_file='tests/task.json')
         result = e.explode_info(e.tasks[0])
         err_msg = "This item should be exploded"
         assert 'key' in result.keys(), err_msg
@@ -131,7 +130,6 @@ class Test(TestEnki):
         assert desc['top'] == self.task['info'], err_msg
         assert desc['freq'] == 1, err_msg
 
-
     @patch('pbclient.requests.get')
     def test_get_tasks(self, Mock):
         """Test get_tasks with tasks works."""
@@ -155,7 +153,7 @@ class Test(TestEnki):
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
                       project_short_name=self.project['short_name'])
-        e.get_tasks(json_file='test_task_no_dict.json')
+        e.get_tasks(json_file='tests/task_no_dict.json')
         desc = e.tasks_df['info'].describe()
         err_msg = "Pandas describe is wrong"
         assert e.tasks_df['id'].count() == 1, err_msg
@@ -170,7 +168,7 @@ class Test(TestEnki):
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
                       project_short_name=self.project['short_name'])
-        e.get_tasks(json_file='test_task.json')
+        e.get_tasks(json_file='tests/task.json')
         desc = e.tasks_df['key'].describe()
         err_msg = "Pandas describe is wrong"
         assert e.tasks_df['id'].count() == 1, err_msg
@@ -178,8 +176,6 @@ class Test(TestEnki):
         assert desc['unique'] == 1, err_msg
         assert desc['top'] == 'value', err_msg
         assert desc['freq'] == 1, err_msg
-
-
 
     @raises(ProjectError)
     @patch('pbclient.requests.get')
@@ -236,8 +232,8 @@ class Test(TestEnki):
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
                       project_short_name=self.project['short_name'])
-        e.get_tasks(json_file='test_task_no_dict.json')
-        e.get_task_runs(json_file='test_taskrun_no_dict.json')
+        e.get_tasks(json_file='tests/task_no_dict.json')
+        e.get_task_runs(json_file='tests/taskrun_no_dict.json')
 
         desc = e.task_runs_df[e.tasks[0].id]['info'].describe()
         err_msg = "Pandas describe is wrong"
@@ -252,8 +248,8 @@ class Test(TestEnki):
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
                       project_short_name=self.project['short_name'])
-        e.get_tasks(json_file='test_task.json')
-        e.get_task_runs(json_file='test_taskrun.json')
+        e.get_tasks(json_file='tests/task.json')
+        e.get_task_runs(json_file='tests/taskrun.json')
 
         desc = e.task_runs_df[e.tasks[0].id]['answer'].describe()
         err_msg = "Pandas describe is wrong"
@@ -269,14 +265,15 @@ class Test(TestEnki):
         Mock.return_value = self.create_fake_request([self.project], 200)
         e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
                       project_short_name=self.project['short_name'])
-        Mock.side_effect = [self.create_fake_request([self.task], 200),
-                            self.create_fake_request([self.ongoing_task], 200),
+        Mock.side_effect = [self.create_fake_request([self.task, self.ongoing_task], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks()
+        print e.tasks
         Mock.side_effect = [self.create_fake_request([self.taskrun], 200),
                             self.create_fake_request([], 200),
                             self.create_fake_request([], 200)]
         e.get_task_runs()
 
         assert len(e.task_runs[self.task['id']]) is 1
+        print self.ongoing_task
         assert e.task_runs[self.ongoing_task['id']] == []

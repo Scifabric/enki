@@ -22,9 +22,10 @@ This module exports:
     * Enki Class: to import an project, its tasks and task runs
 
 """
-import pandas
 import pbclient
-import json
+from task_loaders import create_tasks_loader
+from task_run_loaders import create_task_runs_loader
+import dataframer
 from exceptions import ProjectNotFound, ProjectError, \
     ProjectWithoutTasks, ProjectWithoutTaskRuns
 
@@ -51,105 +52,28 @@ class Enki(object):
 
     def explode_info(self, item):
         """Return the a dict of the object but with info field exploded."""
-        item_data = item.__dict__['data']
-        if type(item.info) == dict:
-            keys = item_data['info'].keys()
-            for k in keys:
-                item_data[k] = item_data['info'][k]
-        return item_data
+        return dataframer.explode_info(item)
 
     def get_tasks(self, task_id=None, state='completed', json_file=None):
         """Load all project Tasks."""
         if self.project is None:
             raise ProjectError
-        if task_id:
-            offset = 0
-            limit = 1
-            query = dict(project_id=self.project.id,
-                         state=state,
-                         id=task_id,
-                         limit=limit,
-                         offset=offset)
-        else:
-            offset = 0
-            limit = 100
-            query = dict(project_id=self.project.id,
-                         state=state,
-                         limit=limit,
-                         offset=offset)
-        self.tasks = []
 
-        if json_file:
-            json_file_data = open(json_file).read()
-            file_tasks = json.loads(json_file_data)
-            for t in file_tasks:
-                self.tasks.append(pbclient.Task(t))
-        else:
-            tasks = pbclient.find_tasks(**query)
-            while(len(tasks) != 0):
-                self.tasks += tasks
-                offset += limit
-                query['offset'] += limit
-                tasks = pbclient.find_tasks(**query)
+        loader = create_tasks_loader(self.project.id, task_id, state, json_file)
+        self.tasks = loader.load()
 
-        # Create the data frame for tasks
-        try:
-            self.tasks[0]
-            data = [self.explode_info(t) for t in self.tasks]
-            index = [t.__dict__['data']['id'] for t in self.tasks]
-            self.tasks_df = pandas.DataFrame(data, index)
-        except:
-            raise ProjectWithoutTasks
+        self._check_project_has_tasks()
+        self.tasks_df = dataframer.create_data_frame(self.tasks)
 
     def get_task_runs(self, json_file=None):
         """Load all project Task Runs from Tasks."""
-        self.task_runs = {}
-        self.task_runs_file = []
-        self.task_runs_df = {}
+        if self.project is None:
+            raise ProjectError
+        loader = create_task_runs_loader(self.project.id, self.tasks, json_file)
+        self.task_runs, self.task_runs_file = loader.load()
 
-        if json_file:
-            json_file_data = open(json_file).read()
-            file_task_runs = json.loads(json_file_data)
-            for tr in file_task_runs:
-                self.task_runs_file.append(pbclient.TaskRun(tr))
-
-        if self.project:
-            task_without_taskruns_count = 0
-            for t in self.tasks:
-                offset = 0
-                limit = 100
-                self.task_runs[t.id] = []
-                if json_file:
-                    self.task_runs[t.id] = [tr for tr in self.task_runs_file
-                                            if (tr.task_id == t.id
-                                                and
-                                                tr.project_id == self.project.id)]
-                else:
-                    tmp = pbclient.find_taskruns(project_id=self.project.id,
-                                                      task_id=t.id,
-                                                      limit=limit,
-                                                      offset=offset)
-                    while(len(tmp) != 0):
-                        self.task_runs[t.id] += tmp
-                        offset += limit
-                        tmp = pbclient.find_taskruns(
-                            project_id=self.project.id,
-                            task_id=t.id,
-                            limit=limit,
-                            offset=offset)
-
-                if len(self.task_runs[t.id]) > 0:
-                    data = [self.explode_info(tr)
-                            for tr in self.task_runs[t.id]]
-                    index = [tr.__dict__['data']['id'] for tr in
-                             self.task_runs[t.id]]
-                    self.task_runs_df[t.id] = pandas.DataFrame(data, index)
-                else:
-                    task_without_taskruns_count += 1
-            if task_without_taskruns_count == len(self.tasks):
-                raise ProjectWithoutTaskRuns
-        else:
-            raise ProjectError()
+        self._check_project_has_taskruns()
+        self.task_runs_df = dataframer.create_task_run_data_frames(self.tasks, self.task_runs)
 
     def get_all(self):  # pragma: no cover
         """Get task and task_runs from project."""
@@ -164,3 +88,13 @@ class Enki(object):
             return self.task_runs_df.describe()
         else:
             return "ERROR: %s not found" % element
+
+    def _check_project_has_tasks(self):
+        if len(self.tasks) == 0:
+            raise ProjectWithoutTasks
+
+    def _check_project_has_taskruns(self):
+        count_task_runs = lambda total, task_runs: total + len(task_runs)
+        total_task_runs = reduce(count_task_runs, self.task_runs.values(), 0)
+        if total_task_runs == 0:
+            raise ProjectWithoutTaskRuns
