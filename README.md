@@ -3,7 +3,7 @@
 [![PyPi Downloads Version](https://img.shields.io/pypi/v/enki.svg)](https://pypi.python.org/pypi/enki/)
 [![PyPi Downloads Month](https://img.shields.io/pypi/dm/enki.svg)](https://pypi.python.org/pypi/enki/)
 
-Makes it easy to statistically analyze [PyBossa](http://dev.pybossa.com>) project results.
+Makes it easy to statistically analyze [PyBossa](http://pybossa.com>) project results.
 
 ## Install
 
@@ -16,7 +16,7 @@ You can install enki using **pip**, preferably while working in a
 
 ## Requirements
 
-PyBossa server >= v0.2.3.
+[PyBossa server](http://pybossa.com) >= v0.2.3.
 
 ## Usage
 
