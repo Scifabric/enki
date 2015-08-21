@@ -14,6 +14,10 @@ You can install enki using **pip**, preferably while working in a
     $ pip install enki
 ```
 
+## Requirements
+
+PyBossa server >= v0.2.3.
+
 ## Usage
 
 It is really simple:
