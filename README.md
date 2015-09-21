@@ -16,7 +16,7 @@ You can install enki using **pip**, preferably while working in a
 
 ## Requirements
 
-[PyBossa server](http://pybossa.com) >= v0.2.3.
+[PyBossa server](http://pybossa.com) >= v1.0.0.
 
 ## Usage
 
@@ -105,7 +105,7 @@ Then you can do the analysis as before.
 Please, see [CONTRIBUTING file](CONTRIBUTING.md)
 
 ## Copyright
-2013 Copyrigth SF Isle of Man
+2015 Copyrigth [SciFabric LTD](http://scifabric.com).
 
 ## License
 

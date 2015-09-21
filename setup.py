@@ -3,12 +3,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='enki',
-    version='0.0.6',
+    version='1.0.0',
     packages=find_packages(),
     install_requires=['pybossa-client>=1.0.3, <1.0.4', 'pandas'],
     # metadata for upload to PyPI
-    author='Daniel Lombraña González',
-    author_email='teleyinex@gmail.com',
+    author='SciFabric LTD',
+    author_email='info@scifabric.com',
     description='A Python library to analyze PyBossa application results',
     long_description='''PyBossa is a crowdsourcing framework. This tiny library that allows you to analyze the results of a PyBossa aplication.''',
     license='AGPLv3',
@@ -16,13 +16,14 @@ setup(
     download_url='https://github.com/PyBossa/enki/zipball/master',
     include_package_data=True,
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Topic :: Software Development :: Libraries :: Python Modules'
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Scientific/Engineering'
     ],
     entry_points=''''''
 )
