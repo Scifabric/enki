@@ -16,7 +16,7 @@ You can install enki using **pip**, preferably while working in a
 
 ## Requirements
 
-[PyBossa server](http://pybossa.com) >= v1.1.0.
+[PyBossa server](http://pybossa.com) >= v1.2.0.
 
 ## Usage
 
