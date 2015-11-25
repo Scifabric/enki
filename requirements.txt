@@ -1,2 +1,2 @@
 pandas
-pybossa-client>=1.0.4, <1.0.5
+pybossa-client>=1.1.1, <1.1.2

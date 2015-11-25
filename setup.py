@@ -3,9 +3,9 @@ from setuptools import setup, find_packages
 
 setup(
     name='enki',
-    version='1.0.1',
+    version='1.0.2',
     packages=find_packages(),
-    install_requires=['pybossa-client>=1.0.4, <1.0.5', 'pandas'],
+    install_requires=['pybossa-client>=1.1.1, <1.1.2', 'pandas'],
     # metadata for upload to PyPI
     author='SciFabric LTD',
     author_email='info@scifabric.com',
