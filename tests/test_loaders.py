@@ -20,6 +20,8 @@ from mock import patch, call
 from base import TestEnki
 from enki.task_loaders import ServerTasksLoader, JsonTasksLoader
 from enki.task_run_loaders import ServerTaskRunsLoader, JsonTaskRunsLoader
+from nose.tools import raises
+from enki.exceptions import PyBossaServerNoKeysetPagination, Error
 
 
 class TestServerTasksLoader(TestEnki):
@@ -141,6 +143,41 @@ class TestServerTaskRunsLoader(object):
         tasks = loader.load()
 
         assert fake_client.mock_calls == [call(**first_query), call(**second_query)]
+
+
+    @raises(PyBossaServerNoKeysetPagination)
+    def test_keyset_pagination_works(self):
+        """Test keyset error pagination works."""
+        tasks = [pbclient.Task({'id': 1})]
+        loader = ServerTaskRunsLoader(project_id=1, tasks=tasks)
+        data = dict(status='failed', exception_msg='last_id')
+        loader.check_errors(data)
+
+    @raises(Error)
+    def test_check_errors_works(self):
+        """Test check_errors returns False when no error."""
+        tasks = [pbclient.Task({'id': 1})]
+        loader = ServerTaskRunsLoader(project_id=1, tasks=tasks)
+
+        data = dict(status='failed', exception_msg='nothing')
+        loader.check_errors(data)
+
+    @raises(Error)
+    def test_check_generic_error_works(self):
+        """Test check_errors raises Error."""
+        tasks = [pbclient.Task({'id': 1})]
+        loader = ServerTaskRunsLoader(project_id=1, tasks=tasks)
+
+        data = dict(status='failed')
+        loader.check_errors(data)
+
+    def test_check_errors_not_json_works(self):
+        """Test check_errors only works for dicts."""
+        tasks = [pbclient.Task({'id': 1})]
+        loader = ServerTaskRunsLoader(project_id=1, tasks=tasks)
+
+        data = [dict(status='failed')]
+        assert loader.check_errors(data) is False, type(data)
 
 
 class TestJsonTaskRunsLoader(object):

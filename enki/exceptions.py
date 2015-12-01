@@ -26,17 +26,6 @@ The module exports:
 """
 
 
-def check_errors(data):
-    """Check for errors on data payload."""
-
-    if (type(data) == dict and 'status' in data.keys()
-        and data['status'] == 'failed'):
-        if data.get('exception_msg') and 'last_id' in data.get('exception_msg'):
-            raise PyBossaServerNoKeysetPagination
-        else:
-            raise Error(data)
-    return False
-
 
 class Error(Exception):
 
