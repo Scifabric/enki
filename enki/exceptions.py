@@ -31,8 +31,10 @@ def check_errors(data):
 
     if (type(data) == dict and 'status' in data.keys()
         and data['status'] == 'failed'):
-        if 'last_id' in data['exception_msg']:
+        if 'last_id' in data.get('exception_msg'):
             raise PyBossaServerNoKeysetPagination
+        else:
+            raise Error(data)
     return False
 
 
