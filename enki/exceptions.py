@@ -33,6 +33,7 @@ def check_errors(data):
         and data['status'] == 'failed'):
         if 'last_id' in data['exception_msg']:
             raise PyBossaServerNoKeysetPagination
+    return False
 
 
 class Error(Exception):
