@@ -26,6 +26,7 @@ The module exports:
 """
 
 
+
 class Error(Exception):
 
     """Base class for Enki errors."""
@@ -80,6 +81,20 @@ class ProjectWithoutTaskRuns(Error):
     def __init__(self):
         """Init method."""
         self.msg = " this project does not have task runs"
+
+    def __str__(self):
+        """String representation."""
+        print self.msg  # pragma: no cover
+
+
+class PyBossaServerNoKeysetPagination(Error):
+
+    """Exception raised for PyBossa server when no keyset pagination."""
+
+    def __init__(self):
+        """Init method."""
+        self.msg = " PyBossa server does not support keyset pagination. \
+                     Upgrade PyBossa server to version v1.2.0"
 
     def __str__(self):
         """String representation."""
