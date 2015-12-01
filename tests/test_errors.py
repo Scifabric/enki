@@ -29,10 +29,11 @@ class TestErrors(TestEnki):
         data = dict(status='failed', exception_msg='last_id')
         check_errors(data)
 
+    @raises(Error)
     def test_check_errors_works(self):
         """Test check_errors returns False when no error."""
         data = dict(status='failed', exception_msg='nothing')
-        assert check_errors(data) is False
+        check_errors(data)
 
     @raises(Error)
     def test_check_generic_error_works(self):
@@ -43,5 +44,4 @@ class TestErrors(TestEnki):
     def test_check_errors_not_json_works(self):
         """Test check_errors only works for dicts."""
         data = [dict(status='failed')]
-        print type(data)
         assert check_errors(data) is False, type(data)
