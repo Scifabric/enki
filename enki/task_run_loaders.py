@@ -18,6 +18,7 @@
 
 import json
 import pbclient
+from exceptions import check_errors
 
 class ServerTaskRunsLoader(object):
 
@@ -36,6 +37,7 @@ class ServerTaskRunsLoader(object):
                                               limit=limit,
                                               offset=0)
             while(len(taskruns) != 0):
+                check_errors(taskruns)
                 task_runs[t.id] += taskruns
                 last_id = taskruns[-1].id
                 taskruns = pbclient.find_taskruns(
