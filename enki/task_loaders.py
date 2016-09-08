@@ -21,8 +21,8 @@ import pbclient
 
 class ServerTasksLoader(object):
 
-    def __init__(self, project_id, task_id=None, state='completed'):
-        self.query = self._build_query(project_id, task_id, state)
+    def __init__(self, project_id, task_id=None, state='completed', all=0):
+        self.query = self._build_query(project_id, task_id, state, all)
 
     def load(self):
         self.tasks = pbclient.find_tasks(**self.query)
@@ -34,17 +34,19 @@ class ServerTasksLoader(object):
             self.tasks += last_fetched_tasks
         return self.tasks
 
-    def _build_query(self, project_id, task_id, state):
+    def _build_query(self, project_id, task_id, state, all):
         if task_id is not None:
             query = dict(project_id=project_id,
                          id=task_id,
                          limit=1,
-                         offset=0)
+                         offset=0,
+                         all=all)
         else:
             query = dict(project_id=project_id,
                          state=state,
                          limit=100,
-                         offset=0)
+                         offset=0,
+                         all=all)
         return query
 
     def _tasks_not_exhausted(self, last_fetched_tasks):
@@ -71,7 +73,7 @@ class JsonTasksLoader(object):
         return [pbclient.Task(t) for t in file_tasks if t['id'] == self.task_id]
 
 
-def create_tasks_loader(project_id, task_id, state, json_file):
+def create_tasks_loader(project_id, task_id, state, json_file, all=0):
     if json_file is not None:
         return JsonTasksLoader(json_file, project_id, task_id, state)
-    return ServerTasksLoader(project_id, task_id, state)
+    return ServerTasksLoader(project_id, task_id, state, all)

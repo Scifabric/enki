@@ -19,9 +19,10 @@
 import enki
 from enki.exceptions import ProjectNotFound, ProjectError, \
     ProjectWithoutTasks, ProjectWithoutTaskRuns
-from mock import patch
+from mock import patch, MagicMock
 from base import TestEnki
 from nose.tools import raises
+from pbclient import Project, Task, TaskRun
 
 
 class Test(TestEnki):
@@ -42,6 +43,18 @@ class Test(TestEnki):
                       project_short_name=self.project['short_name'])
         assert e.project.id == self.project['id'], e.project
         assert e.project.short_name == self.project['short_name'], e.project
+
+    @patch('pbclient.find_project')
+    def test_get_project_found_all(self, Mock):
+        """Test project found all works."""
+        Mock.return_value = [Project(self.project)]
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'], all=1)
+        assert e.project.id == self.project['id'], e.project
+        assert e.project.short_name == self.project['short_name'], e.project
+        assert e.all == 1, e.all
+        query = dict(short_name=e.project.short_name, all=1)
+        Mock.assert_called_with(**query)
 
     @patch('pbclient.requests.get')
     def test_explode_info_without_info_dict(self, Mock):
@@ -147,6 +160,19 @@ class Test(TestEnki):
         assert desc['top'] == self.task['info'], err_msg
         assert desc['freq'] == 1, err_msg
 
+    @patch('enki.create_tasks_loader')
+    @patch('pbclient.requests.get')
+    def test_get_tasks_all_arg(self, Mock, f):
+        """Test get_tasks with all arg works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
+        loader = MagicMock()
+        loader.load.return_value = [Task(self.task)]
+        f.return_value = loader
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'], all=1)
+        e.get_tasks()
+        f.assert_called_with(e.project.id, None, 'completed', None, 1)
+
     @patch('pbclient.requests.get')
     def test_get_tasks_with_file(self, Mock):
         """Test get_tasks with tasks file works."""
@@ -225,6 +251,27 @@ class Test(TestEnki):
         assert desc['unique'] == 1, err_msg
         assert desc['top'] == self.task['info'], err_msg
         assert desc['freq'] == 1, err_msg
+
+    @patch('enki.create_task_runs_loader')
+    @patch('pbclient.requests.get')
+    def test_get_task_runs_all(self, Mock, f):
+        """Test get_task_runs with all arg works."""
+        Mock.return_value = self.create_fake_request([self.project], 200)
+        e = enki.Enki(api_key='key', endpoint='http://localhost:5000',
+                      project_short_name=self.project['short_name'], all=1)
+        Mock.side_effect = [self.create_fake_request([self.task], 200),
+                            self.create_fake_request([], 200)]
+        e.get_tasks()
+        Mock.side_effect = [self.create_fake_request([self.taskrun], 200),
+                            self.create_fake_request([], 200)]
+
+        loader = MagicMock()
+        task_runs = {}
+        task_runs[self.task['id']] = [TaskRun(self.taskrun)]
+        loader.load.return_value = (task_runs, None)
+        f.return_value = loader
+        e.get_task_runs()
+        f.assert_called_with(e.project.id, e.tasks, None, 1)
 
     @patch('pbclient.requests.get')
     def test_get_task_runs_with_file_no_dict(self, Mock):

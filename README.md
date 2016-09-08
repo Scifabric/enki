@@ -1,9 +1,9 @@
-# Dead simple Python package for analyzing PyBossa project's results
-[![Build Status](https://travis-ci.org/PyBossa/enki.svg)](https://travis-ci.org/PyBossa/enki) [![Coverage Status](https://coveralls.io/repos/PyBossa/enki/badge.svg)](https://coveralls.io/r/PyBossa/enki)
+# Dead simple Python package for analyzing PYBOSSA project's results
+[![Build Status](https://travis-ci.org/PYBOSSA/enki.svg)](https://travis-ci.org/PyBossa/enki) [![Coverage Status](https://coveralls.io/repos/PyBossa/enki/badge.svg)](https://coveralls.io/r/PyBossa/enki)
 [![PyPi Downloads Version](https://img.shields.io/pypi/v/enki.svg)](https://pypi.python.org/pypi/enki/)
 [![PyPi Downloads Month](https://img.shields.io/pypi/dm/enki.svg)](https://pypi.python.org/pypi/enki/)
 
-Makes it easy to statistically analyze [PyBossa](http://pybossa.com>) project results.
+Makes it easy to statistically analyze [PYBOSSA](http://pybossa.com>) project results.
 
 ## Install
 
@@ -16,7 +16,7 @@ You can install enki using **pip**, preferably while working in a
 
 ## Requirements
 
-[PyBossa server](http://pybossa.com) >= v1.2.0.
+[PYBOSSA server](http://pybossa.com) >= v1.2.0.
 
 ## Usage
 
@@ -82,9 +82,9 @@ e.get_task_runs()
 ```
 That will get the partial results. Then you can proceed with the analysis as before.
 
-# Using PyBossa JSON files
+# Using PYBOSSA JSON files
 
-PyBossa exports the tasks and task runs as ZIP files in JSON format. You can pass those files to Enki, and
+PYBOSSA exports the tasks and task runs as ZIP files in JSON format. You can pass those files to Enki, and
 avoid using the API for a faster analysis. If that's the case, download both files (task and task runs) and import them:
 
 ```python
@@ -100,12 +100,26 @@ avoid using the API for a faster analysis. If that's the case, download both fil
 
 Then you can do the analysis as before. 
 
+**NOTE**: If you want to anlayze a project from another person in the same server,
+then you can use the all=1 parameter when creating the Enki object:
+
+```python
+    >>> import enki
+
+    # setup the server connection
+    >>> e = enki.Enki(api_key='your-key', endpoint='http://server',
+                  project_short_name='your-project-short-name', all=1)
+    # Get all completed tasks and its associated task runs
+    e.get_all()
+```
+This will ensure that Enki will search across all projects in PYBOSSA.
+
 # Contributing
 
 Please, see [CONTRIBUTING file](CONTRIBUTING.md)
 
 ## Copyright
-2015 Copyrigth [SciFabric LTD](http://scifabric.com).
+2016 Copyrigth [Scifabric LTD](http://scifabric.com).
 
 ## License
 

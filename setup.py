@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='enki',
-    version='1.0.3',
+    version='1.1.0',
     packages=find_packages(),
     install_requires=['pybossa-client>=1.1.1, <1.1.2', 'pandas'],
     # metadata for upload to PyPI
