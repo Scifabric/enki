@@ -22,9 +22,10 @@ from exceptions import Error, PyBossaServerNoKeysetPagination
 
 class ServerTaskRunsLoader(object):
 
-    def __init__(self, project_id, tasks):
+    def __init__(self, project_id, tasks, all=0):
         self.project_id = project_id
         self.tasks = tasks
+        self.all = all
 
     def check_errors(self, data):
         """Check for errors on data payload."""
@@ -46,7 +47,8 @@ class ServerTaskRunsLoader(object):
             taskruns = pbclient.find_taskruns(project_id=self.project_id,
                                               task_id=t.id,
                                               limit=limit,
-                                              offset=0)
+                                              offset=0,
+                                              all=self.all)
             while(len(taskruns) != 0):
                 self.check_errors(taskruns)
                 task_runs[t.id] += taskruns
@@ -55,7 +57,8 @@ class ServerTaskRunsLoader(object):
                     project_id=self.project_id,
                     task_id=t.id,
                     limit=limit,
-                    last_id=last_id)
+                    last_id=last_id,
+                    all=self.all)
         return (task_runs, None)
 
 

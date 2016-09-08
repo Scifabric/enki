@@ -32,7 +32,8 @@ class TestServerTasksLoader(TestEnki):
         task_data = {'id': 1, 'project_id': project_id, 'state': 'completed'}
         task = pbclient.Task(task_data)
         fake_client.side_effect = [[task]]
-        query = dict(project_id=task.project_id, id=task.id, limit=1, offset=0)
+        query = dict(project_id=task.project_id, id=task.id,
+                     limit=1, offset=0, all=0)
 
         loader = ServerTasksLoader(project_id, task.id)
         tasks = loader.load()
@@ -43,7 +44,7 @@ class TestServerTasksLoader(TestEnki):
     @patch('pbclient.find_tasks')
     def test_load_all_tasks_if_no_task_id_is_given(self, fake_client):
         project = pbclient.Project(self.project)
-        query = dict(project_id=1, limit=100, offset=0, state='completed')
+        query = dict(project_id=1, limit=100, offset=0, state='completed', all=0)
         response = [pbclient.Task({'id': n}) for n in range(2)]
         fake_client.side_effect = [response]
 
@@ -56,8 +57,10 @@ class TestServerTasksLoader(TestEnki):
     @patch('pbclient.find_tasks')
     def test_load_all_tasks_uses_keyset_pagination(self, fake_client):
         project = pbclient.Project(self.project)
-        first_query = dict(project_id=1, limit=100, offset=0, state='completed')
-        second_query = dict(project_id=1, limit=100, last_id=99, state='completed')
+        first_query = dict(project_id=1, limit=100, offset=0,
+                           state='completed', all=0)
+        second_query = dict(project_id=1, limit=100, last_id=99,
+                            state='completed', all=0)
 
         first_response = [pbclient.Task({'id': n}) for n in range(100)]
         second_response = [pbclient.Task({'id': 100+n}) for n in range(2)]
@@ -137,8 +140,8 @@ class TestServerTaskRunsLoader(object):
             [pbclient.TaskRun({'id': 1, 'task_id': 1, 'project_id': 1}),
              pbclient.TaskRun({'id': 2, 'task_id': 1, 'project_id': 1})],
             []]
-        first_query = dict(limit=100, offset=0, project_id=1, task_id=1)
-        second_query = dict(last_id=2, limit=100, project_id=1, task_id=1)
+        first_query = dict(limit=100, offset=0, project_id=1, task_id=1, all=0)
+        second_query = dict(last_id=2, limit=100, project_id=1, task_id=1, all=0)
 
         tasks = loader.load()
 

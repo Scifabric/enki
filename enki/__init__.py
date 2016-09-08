@@ -34,9 +34,11 @@ class Enki(object):
 
     """General class for Enki."""
 
-    def __init__(self, api_key, endpoint, project_short_name):
+    def __init__(self, api_key, endpoint,
+                 project_short_name, all=0):
         """Initiate."""
         self.project = None
+        self.all = all
         pbclient.set('api_key', api_key)
         pbclient.set('endpoint', endpoint)
         if self.project is None:
@@ -44,7 +46,8 @@ class Enki(object):
 
     def get_project(self, project_short_name):
         """Return project object."""
-        project = pbclient.find_project(short_name=project_short_name)
+        project = pbclient.find_project(short_name=project_short_name,
+                                        all=self.all)
         if (len(project) == 1):
             return project[0]
         else:
@@ -59,7 +62,8 @@ class Enki(object):
         if self.project is None:
             raise ProjectError
 
-        loader = create_tasks_loader(self.project.id, task_id, state, json_file)
+        loader = create_tasks_loader(self.project.id, task_id,
+                                     state, json_file, all)
         self.tasks = loader.load()
 
         self._check_project_has_tasks()
