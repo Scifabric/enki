@@ -63,7 +63,7 @@ class Enki(object):
             raise ProjectError
 
         loader = create_tasks_loader(self.project.id, task_id,
-                                     state, json_file, all)
+                                     state, json_file, self.all)
         self.tasks = loader.load()
 
         self._check_project_has_tasks()
@@ -73,7 +73,8 @@ class Enki(object):
         """Load all project Task Runs from Tasks."""
         if self.project is None:
             raise ProjectError
-        loader = create_task_runs_loader(self.project.id, self.tasks, json_file)
+        loader = create_task_runs_loader(self.project.id, self.tasks,
+                                         json_file, self.all)
         self.task_runs, self.task_runs_file = loader.load()
 
         self._check_project_has_taskruns()

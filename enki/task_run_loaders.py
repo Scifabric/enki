@@ -90,7 +90,7 @@ class JsonTaskRunsLoader(object):
                                     and tr.project_id == self.project_id)]
 
 
-def create_task_runs_loader(project_id, tasks, json_file):
+def create_task_runs_loader(project_id, tasks, json_file, all=0):
     if json_file is not None:
         return JsonTaskRunsLoader(project_id, tasks, json_file)
-    return ServerTaskRunsLoader(project_id, tasks)
+    return ServerTaskRunsLoader(project_id, tasks, all)
