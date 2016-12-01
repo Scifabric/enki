@@ -92,6 +92,8 @@ class Test(TestEnki):
         result = e.explode_info(e.tasks[0])
         err_msg = "This item should be exploded"
         assert 'key' in result.keys(), err_msg
+        err_msg = "This item should be escaped"
+        assert '_id' in result.keys(), err_msg
 
     @patch('pbclient.requests.get')
     def test_explode_info_with_info_dict_file(self, Mock):
@@ -103,6 +105,8 @@ class Test(TestEnki):
         result = e.explode_info(e.tasks[0])
         err_msg = "This item should be exploded"
         assert 'key' in result.keys(), err_msg
+        err_msg = "This item should be escaped"
+        assert '_id' in result.keys(), err_msg
 
     @raises(ProjectError)
     @patch('pbclient.requests.get')

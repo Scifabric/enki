@@ -53,7 +53,7 @@ class TestEnki(object):
                 link="<link rel='self' title='task' href='http://localhost:5000/api/task/1'/>",
                 id=1)
 
-    task2 = dict(info=dict(key='value'),
+    task2 = dict(info=dict(key='value', id=1231),
                  n_answers=30,
                  quorum=0,
                  links=["<link rel='parent' title='project' href='http://localhost:5000/api/project/1'/>"],
@@ -63,7 +63,7 @@ class TestEnki(object):
                  link="<link rel='self' title='task' href='http://localhost:5000/api/task/1'/>",
                  id=1)
 
-    ongoing_task = dict(info=dict(key='value'),
+    ongoing_task = dict(info=dict(key='value', id=11234123),
                  n_answers=30,
                  quorum=0,
                  links=["<link rel='parent' title='project' href='http://localhost:5000/api/project/1'/>"],

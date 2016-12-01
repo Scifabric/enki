@@ -34,8 +34,12 @@ def create_data_frame(item):
 
 def explode_info(item):
     item_data = item.__dict__['data']
+    protected = item_data.keys()
     if type(item.info) == dict:
         keys = item_data['info'].keys()
         for k in keys:
-            item_data[k] = item_data['info'][k]
+            if k in protected:
+                item_data["_" + k] = item_data['info'][k]
+            else:
+                item_data[k] = item_data['info'][k]
     return item_data

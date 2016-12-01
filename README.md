@@ -1,5 +1,5 @@
 # Dead simple Python package for analyzing PYBOSSA project's results
-[![Build Status](https://travis-ci.org/PYBOSSA/enki.svg)](https://travis-ci.org/PyBossa/enki) [![Coverage Status](https://coveralls.io/repos/PyBossa/enki/badge.svg)](https://coveralls.io/r/PyBossa/enki)
+[![Build Status](https://travis-ci.org/Scifabric/enki.svg)](https://travis-ci.org/PyBossa/enki) [![Coverage Status](https://coveralls.io/repos/PyBossa/enki/badge.svg)](https://coveralls.io/r/PyBossa/enki)
 [![PyPi Downloads Version](https://img.shields.io/pypi/v/enki.svg)](https://pypi.python.org/pypi/enki/)
 [![PyPi Downloads Month](https://img.shields.io/pypi/dm/enki.svg)](https://pypi.python.org/pypi/enki/)
 
@@ -73,6 +73,10 @@ Enki explodes the task_run info field if it is a dictionary (a JSON
 object). This will help you to analyze more easily for example, all the
 keys of the object via [Pandas](http://pandas.pydata.org/) statistical solutions. All you have to do is
 to access the key and use [Pandas](http://pandas.pydata.org/) methods.
+
+**WARNING**: If a task or taskrun has inside the *info* field a key that is protected, it will be escaped.
+For example, if exists task.info.id == 13, then, enki will escape it to **_id**. Enki will do it with all the
+protected attributes of Tasks and TaskRuns.
 
 **NOTE**: if you want to load partial results, you can do it. Instead of using e.get_all() method, use the following code:
 
