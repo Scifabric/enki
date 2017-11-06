@@ -1,5 +1,5 @@
 # Dead simple Python package for analyzing PYBOSSA project's results
-[![Build Status](https://travis-ci.org/Scifabric/enki.svg)](https://travis-ci.org/PyBossa/enki) [![Coverage Status](https://coveralls.io/repos/PyBossa/enki/badge.svg)](https://coveralls.io/r/PyBossa/enki)
+[![Build Status](https://travis-ci.org/Scifabric/enki.svg)](https://travis-ci.org/Scifabric/enki) [![Coverage Status](https://coveralls.io/repos/Scifabric/enki/badge.svg)](https://coveralls.io/r/Scifabric/enki)
 [![PyPi Downloads Version](https://img.shields.io/pypi/v/enki.svg)](https://pypi.python.org/pypi/enki/)
 [![PyPi Downloads Month](https://img.shields.io/pypi/dm/enki.svg)](https://pypi.python.org/pypi/enki/)
 
