@@ -27,10 +27,13 @@ It is really simple:
 
     # setup the server connection
     >>> e = enki.Enki(api_key='your-key', endpoint='http://server',
-                      project_short_name='your-project-short-name')
+                      project_short_name='your-project-short-name',
+                      all=1)
     # Get all completed tasks and its associated task runs
     >>> e.get_all()
 ```
+
+NOTE: You should use the all=1 if you are not the owner of the project and you have an admin API key, otherwise the PYBOSSA context will return a 404 as the project does not belong to you.
 
 The previous command, loads all **completed** tasks and task runs into four variables:
 
