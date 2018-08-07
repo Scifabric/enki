@@ -19,6 +19,7 @@
 import json
 import pbclient
 
+
 class ServerTasksLoader(object):
 
     def __init__(self, project_id, task_id=None, state='completed', all=0):
