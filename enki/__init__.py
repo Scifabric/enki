@@ -23,11 +23,12 @@ This module exports:
 
 """
 import pbclient
-from task_loaders import create_tasks_loader
-from task_run_loaders import create_task_runs_loader
-import dataframer
-from exceptions import ProjectNotFound, ProjectError, \
+from .task_loaders import create_tasks_loader
+from .task_run_loaders import create_task_runs_loader
+from . import dataframer
+from .exceptions import ProjectNotFound, ProjectError, \
     ProjectWithoutTasks, ProjectWithoutTaskRuns
+from functools import reduce
 
 
 class Enki(object):
@@ -100,6 +101,6 @@ class Enki(object):
 
     def _check_project_has_taskruns(self):
         count_task_runs = lambda total, task_runs: total + len(task_runs)
-        total_task_runs = reduce(count_task_runs, self.task_runs.values(), 0)
+        total_task_runs = reduce(count_task_runs, list(self.task_runs.values()), 0)
         if total_task_runs == 0:
             raise ProjectWithoutTaskRuns
