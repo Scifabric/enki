@@ -212,6 +212,6 @@ def assert_all_tasks_belong_to_project(tasks, project_id):
         assert task.project_id == project_id
 
 def assert_task_runs_grouped_by_task(task_runs):
-    for task in task_runs.keys():
+    for task in list(task_runs.keys()):
         for task_run in task_runs[task]:
             assert task == task_run.task_id, task_runs
