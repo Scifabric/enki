@@ -18,7 +18,7 @@
 
 import json
 import pbclient
-from exceptions import Error, PyBossaServerNoKeysetPagination
+from .exceptions import Error, PyBossaServerNoKeysetPagination
 
 class ServerTaskRunsLoader(object):
 
@@ -30,7 +30,7 @@ class ServerTaskRunsLoader(object):
     def check_errors(self, data):
         """Check for errors on data payload."""
 
-        if (type(data) == dict and 'status' in data.keys()
+        if (type(data) == dict and 'status' in list(data.keys())
             and data['status'] == 'failed'):
             if data.get('exception_msg') and 'last_id' in data.get('exception_msg'):
                 raise PyBossaServerNoKeysetPagination

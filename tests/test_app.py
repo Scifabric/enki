@@ -67,7 +67,7 @@ class Test(TestEnki):
         e.get_tasks()
         result = e.explode_info(e.tasks[0])
         err_msg = "This item should not be exploded"
-        assert result.keys() == self.task.keys(), err_msg
+        assert list(result.keys()) == list(self.task.keys()), err_msg
 
     @patch('pbclient.requests.get')
     def test_explode_info_without_info_dict_file(self, Mock):
@@ -78,7 +78,7 @@ class Test(TestEnki):
         e.get_tasks(json_file='tests/task_no_dict.json')
         result = e.explode_info(e.tasks[0])
         err_msg = "This item should not be exploded"
-        assert 'new_key' not in result.keys(), err_msg
+        assert 'new_key' not in list(result.keys()), err_msg
 
     @patch('pbclient.requests.get')
     def test_explode_info_with_info_dict(self, Mock):
@@ -91,9 +91,9 @@ class Test(TestEnki):
         e.get_tasks()
         result = e.explode_info(e.tasks[0])
         err_msg = "This item should be exploded"
-        assert 'key' in result.keys(), err_msg
+        assert 'key' in list(result.keys()), err_msg
         err_msg = "This item should be escaped"
-        assert '_id' in result.keys(), err_msg
+        assert '_id' in list(result.keys()), err_msg
 
     @patch('pbclient.requests.get')
     def test_explode_info_with_info_dict_file(self, Mock):
@@ -104,9 +104,9 @@ class Test(TestEnki):
         e.get_tasks(json_file='tests/task.json')
         result = e.explode_info(e.tasks[0])
         err_msg = "This item should be exploded"
-        assert 'key' in result.keys(), err_msg
+        assert 'key' in list(result.keys()), err_msg
         err_msg = "This item should be escaped"
-        assert '_id' in result.keys(), err_msg
+        assert '_id' in list(result.keys()), err_msg
 
     @raises(ProjectError)
     @patch('pbclient.requests.get')
@@ -319,12 +319,12 @@ class Test(TestEnki):
         Mock.side_effect = [self.create_fake_request([self.task, self.ongoing_task], 200),
                             self.create_fake_request([], 200)]
         e.get_tasks()
-        print e.tasks
+        print(e.tasks)
         Mock.side_effect = [self.create_fake_request([self.taskrun], 200),
                             self.create_fake_request([], 200),
                             self.create_fake_request([], 200)]
         e.get_task_runs()
 
         assert len(e.task_runs[self.task['id']]) is 1
-        print self.ongoing_task
+        print(self.ongoing_task)
         assert e.task_runs[self.ongoing_task['id']] == []

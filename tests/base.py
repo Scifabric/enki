@@ -107,5 +107,5 @@ class TestEnki(object):
         return error
 
     def check_error_output(self, res, err):
-        for k in err.keys():
+        for k in list(err.keys()):
             assert err[k] == res[k], err

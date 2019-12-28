@@ -45,7 +45,7 @@ class ProjectNotFound(Error):
 
     def __str__(self):
         """String representation."""
-        print self.msg  # pragma: no cover
+        print(self.msg)  # pragma: no cover
 
 
 class ProjectError(Error):
@@ -58,7 +58,7 @@ class ProjectError(Error):
 
     def __str__(self):  # pragma: no cover
         """String representation."""
-        print self.msg
+        print(self.msg)
 
 
 class ProjectWithoutTasks(Error):
@@ -71,7 +71,7 @@ class ProjectWithoutTasks(Error):
 
     def __str__(self):
         """String representation."""
-        print self.msg  # pragma: no cover
+        print(self.msg)  # pragma: no cover
 
 
 class ProjectWithoutTaskRuns(Error):
@@ -84,7 +84,7 @@ class ProjectWithoutTaskRuns(Error):
 
     def __str__(self):
         """String representation."""
-        print self.msg  # pragma: no cover
+        print(self.msg)  # pragma: no cover
 
 
 class PyBossaServerNoKeysetPagination(Error):
@@ -98,4 +98,4 @@ class PyBossaServerNoKeysetPagination(Error):
 
     def __str__(self):
         """String representation."""
-        print self.msg  # pragma: no cover
+        print(self.msg)  # pragma: no cover
